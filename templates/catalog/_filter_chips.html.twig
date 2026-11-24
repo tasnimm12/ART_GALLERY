@@ -1,0 +1,46 @@
+{% set hasChip = false %}
+{% if searchDTO.q is not empty %}
+    <button class="filter-chip" data-filter-key="q" type="button">Recherche : {{ searchDTO.q }} <span aria-hidden="true">×</span></button>
+    {% set hasChip = true %}
+{% endif %}
+{% if searchDTO.category %}
+    <button class="filter-chip" data-filter-key="category" type="button">Catégorie : {{ searchDTO.category.name }} <span aria-hidden="true">×</span></button>
+    {% set hasChip = true %}
+{% endif %}
+{% if searchDTO.artist %}
+    <button class="filter-chip" data-filter-key="artist" type="button">Artiste : {{ searchDTO.artist.name }} <span aria-hidden="true">×</span></button>
+    {% set hasChip = true %}
+{% endif %}
+{% if searchDTO.status is not empty %}
+    {% set statusLabels = {
+        'AVAILABLE': 'Disponible à l’achat',
+        'AUCTION': 'En enchère',
+        'RESERVED': 'Réservé',
+        'SOLD': 'Vendu'
+    } %}
+    <button class="filter-chip" data-filter-key="status" type="button">Disponibilité : {{ statusLabels[searchDTO.status]|default(searchDTO.status) }} <span aria-hidden="true">×</span></button>
+    {% set hasChip = true %}
+{% endif %}
+{% if searchDTO.minPrice is not null or searchDTO.maxPrice is not null %}
+    <button class="filter-chip" data-filter-key="price" type="button">
+        Prix :
+        {% if searchDTO.minPrice is not null %}{{ searchDTO.minPrice|number_format(0, ',', ' ') }} €{% else %}sans minimum{% endif %}
+        –
+        {% if searchDTO.maxPrice is not null %}{{ searchDTO.maxPrice|number_format(0, ',', ' ') }} €{% else %}sans maximum{% endif %}
+        <span aria-hidden="true">×</span>
+    </button>
+    {% set hasChip = true %}
+{% endif %}
+{% if searchDTO.color is not empty %}
+    {% set selectedColorLabel = searchDTO.color %}
+    {% for color in artworkColors %}
+        {% if color.slug == searchDTO.color %}
+            {% set selectedColorLabel = color.name %}
+        {% endif %}
+    {% endfor %}
+    <button class="filter-chip" data-filter-key="color" type="button">Couleur : {{ selectedColorLabel }} <span aria-hidden="true">×</span></button>
+    {% set hasChip = true %}
+{% endif %}
+{% if not hasChip %}
+    <span class="chips-empty">Aucun filtre actif</span>
+{% endif %}

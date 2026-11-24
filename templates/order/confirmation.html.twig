@@ -1,0 +1,139 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Confirmation de commande #{{ order.orderNumber }} - Abstract Art Gallery{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .confirmation-card {
+            max-width: 780px;
+            margin: 40px auto;
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .success-icon-box {
+            width: 80px;
+            height: 80px;
+            background: #dcfce7;
+            color: #15803d;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 20px auto;
+        }
+        .confirmation-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 8px;
+        }
+        .confirmation-subtitle {
+            color: #64748b;
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+        .order-summary-box {
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            padding: 24px;
+            text-align: left;
+            margin-bottom: 30px;
+        }
+        .order-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .info-cell h4 {
+            margin: 0 0 4px 0;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #64748b;
+        }
+        .info-cell p {
+            margin: 0;
+            font-weight: 700;
+            color: #0f172a;
+            font-size: 15px;
+        }
+        .items-list {
+            margin-top: 15px;
+        }
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="confirmation-card">
+    <div class="success-icon-box">✓</div>
+    <h1 class="confirmation-title">Merci pour votre acquisition !</h1>
+    <p class="confirmation-subtitle">Votre commande a été confirmée et le paiement a été validé avec succès.</p>
+
+    <div class="order-summary-box">
+        <div class="order-info-grid">
+            <div class="info-cell">
+                <h4>N° de Commande</h4>
+                <p>{{ order.orderNumber }}</p>
+            </div>
+            <div class="info-cell">
+                <h4>Date</h4>
+                <p>{{ order.createdAt|date('d/m/Y à H:i') }}</p>
+            </div>
+            <div class="info-cell">
+                <h4>Statut</h4>
+                <p><span class="badge" style="background: #dcfce7; color: #15803d;">Payée & Validée</span></p>
+            </div>
+            <div class="info-cell">
+                <h4>Montant Total</h4>
+                <p>{{ order.totalAmount|number_format(2, ',', ' ') }} {{ order.currency }}</p>
+            </div>
+        </div>
+
+        <h3 style="margin: 0 0 12px 0; font-size: 16px; color: #0f172a;">Œuvres acquises :</h3>
+        <div class="items-list">
+            {% for item in order.items %}
+                <div class="item-row">
+                    <div>
+                        <strong>{{ item.artworkTitle }}</strong>
+                        <span style="color: #64748b; font-size: 13px;">(Par {{ item.artistName }})</span>
+                    </div>
+                    <div>
+                        <strong>{{ item.totalPrice|number_format(2, ',', ' ') }} {{ order.currency }}</strong>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <a href="{{ path('app_order_history') }}" class="nav-btn nav-btn-primary">
+            Voir mes commandes
+        </a>
+        <a href="{{ path('app_catalog_index') }}" class="nav-btn nav-btn-outline">
+            Retourner au catalogue
+        </a>
+    </div>
+</div>
+{% endblock %}

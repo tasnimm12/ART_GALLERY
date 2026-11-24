@@ -1,0 +1,445 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block page_title %}Abstract Art Gallery — Administration{% endblock %}
+{% block content_title %}{% endblock %}
+
+{% block main %}
+    <div class="admin-dashboard">
+        {# =========================================================
+           1. HEADER DU DASHBOARD
+           ========================================================= #}
+        <header class="dash-header-banner">
+            <div class="dash-header-banner__intro">
+                <div class="dash-header-banner__eyebrow">BACK OFFICE</div>
+                <h1 class="dash-header-banner__title">Bienvenue dans Abstract Art Gallery</h1>
+                <p class="dash-header-banner__subtitle">Vue d'ensemble</p>
+            </div>
+
+            <div class="dash-header-banner__actions">
+                <label for="period-select" class="sr-only">Période d'analyse</label>
+                <select id="period-select" name="period" class="dash-period-select" onchange="window.location.search = '?period=' + this.value" aria-label="Sélectionner la période">
+                    <option value="today" {{ period == 'today' ? 'selected' : '' }}>Aujourd'hui</option>
+                    <option value="7d" {{ period == '7d' ? 'selected' : '' }}>7 derniers jours</option>
+                    <option value="30d" {{ period == '30d' ? 'selected' : '' }}>30 derniers jours</option>
+                    <option value="90d" {{ period == '90d' ? 'selected' : '' }}>3 derniers mois</option>
+                    <option value="365d" {{ period == '365d' ? 'selected' : '' }}>12 derniers mois</option>
+                </select>
+            </div>
+        </header>
+
+        {# =========================================================
+           2. INDICATEURS CLÉS
+           ========================================================= #}
+        <section class="kpi-grid" aria-label="Indicateurs clés de performance">
+            {% for kpi in kpiCards %}
+                <article class="kpi-card kpi-card--{{ kpi.key }}">
+                    <div class="kpi-card__header">
+                        <span class="kpi-card__title">{{ kpi.title }}</span>
+                        <div class="kpi-card__icon-wrapper" aria-hidden="true">
+                            <i class="fa fa-{{ kpi.icon }}"></i>
+                        </div>
+                    </div>
+                    <div class="kpi-card__value">{{ kpi.value }}</div>
+                    <div class="kpi-card__subtitle">{{ kpi.subtitle }}</div>
+                </article>
+            {% endfor %}
+        </section>
+
+        {# =========================================================
+           3. ANALYTIQUE & ACTIVITÉ RÉCENTE (2 COLONNES)
+           ========================================================= #}
+        <section class="dash-analytics-grid" aria-label="Évolution des ventes et activité récente">
+            {# Colonne Gauche : Évolution des ventes #}
+            <article class="dash-panel">
+                <header class="dash-panel__header">
+                    <div class="dash-panel__title-group">
+                        <span class="dash-panel__eyebrow">Performance Commerciale</span>
+                        <h2 class="dash-panel__title">Évolution des ventes</h2>
+                    </div>
+
+                    <div class="chart-tabs" role="tablist" aria-label="Périodes du graphique">
+                        <a href="?period=7d" class="chart-tab {{ period == '7d' ? 'active' : '' }}">7 derniers jours</a>
+                        <a href="?period=30d" class="chart-tab {{ period == '30d' ? 'active' : '' }}">30 derniers jours</a>
+                        <a href="?period=365d" class="chart-tab {{ period == '365d' ? 'active' : '' }}">12 derniers mois</a>
+                    </div>
+                </header>
+
+                <div class="sales-chart-wrapper">
+                    {% set maxVal = revenueMax > 0 ? revenueMax : 1000 %}
+                    <div class="chart-bars-container" aria-label="Graphique des revenus">
+                        {% for point in revenueSeries %}
+                            {% set barPct = maxVal > 0 ? ((point.value / maxVal) * 90 + 5) : 5 %}
+                            <div class="chart-bar-column" title="{{ point.fullDate|default(point.label) }} : {{ point.value|number_format(2, ',', ' ') }} € ({{ point.orders|default(0) }} commande{{ point.orders|default(0) > 1 ? 's' : '' }})">
+                                <div class="chart-bar-fill" style="height: {{ barPct }}%;"></div>
+                                <span class="chart-bar-label">{{ point.label }}</span>
+                            </div>
+                        {% else %}
+                            <div style="color: var(--aag-text-muted); text-align: center; width: 100%; padding: 40px 0;">
+                                Aucune donnée de vente pour cette période.
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <footer class="chart-summary-bar">
+                    <div class="chart-summary-item">
+                        <span>Artistes</span>
+                        <strong>{{ artistsCount|default(0) }}</strong>
+                    </div>
+                    <div class="chart-summary-item">
+                        <span>Catégories</span>
+                        <strong>{{ categoriesCount|default(0) }}</strong>
+                    </div>
+                    <div class="chart-summary-item">
+                        <span>Lots actifs</span>
+                        <strong>{{ lotsCount|default(0) }}</strong>
+                    </div>
+                    <div class="chart-summary-item">
+                        <span>Commandes</span>
+                        <strong>{{ ordersCount|default(0) }}</strong>
+                    </div>
+                </footer>
+            </article>
+
+            {# Colonne Droite : Activité récente #}
+            <aside class="dash-panel">
+                <header class="dash-panel__header">
+                    <div class="dash-panel__title-group">
+                        <span class="dash-panel__eyebrow">Journal en Direct</span>
+                        <h2 class="dash-panel__title">Activité récente</h2>
+                    </div>
+                </header>
+
+                <ul class="activity-timeline" aria-label="Fil d'activité">
+                    {% for act in recentActivity %}
+                        <li class="activity-item">
+                            <div class="activity-item__icon" aria-hidden="true">
+                                {% if act.icon == 'cart' %}
+                                    <i class="fa fa-shopping-cart"></i>
+                                {% elseif act.icon == 'card' %}
+                                    <i class="fa fa-credit-card"></i>
+                                {% elseif act.icon == 'user' %}
+                                    <i class="fa fa-user-plus"></i>
+                                {% elseif act.icon == 'palette' %}
+                                    <i class="fa fa-palette"></i>
+                                {% elseif act.icon == 'gavel' %}
+                                    <i class="fa fa-gavel"></i>
+                                {% else %}
+                                    <i class="fa fa-circle-check"></i>
+                                {% endif %}
+                            </div>
+                            <div class="activity-item__body">
+                                <div class="activity-item__top">
+                                    <h3 class="activity-item__title">{{ act.title }}</h3>
+                                    <span class="activity-item__time">{{ act.relativeTime }}</span>
+                                </div>
+                                <p class="activity-item__desc">{{ act.description }}</p>
+                            </div>
+                        </li>
+                    {% else %}
+                        <li style="color: var(--aag-text-muted); padding: 20px 0; text-align: center;">
+                            Aucune activité récente enregistrée.
+                        </li>
+                    {% endfor %}
+                </ul>
+            </aside>
+        </section>
+
+        {# =========================================================
+           4. SECTION ENCHÈRES
+           ========================================================= #}
+        <section class="dash-table-section" aria-label="Gestion des enchères">
+            <header class="dash-table-header">
+                <div class="dash-panel__title-group">
+                    <span class="dash-panel__eyebrow">Maison de Vente</span>
+                    <h2 class="dash-panel__title">Enchères & Lots en direct</h2>
+                </div>
+
+                <div class="dash-table-summary-badges">
+                    <span class="dash-summary-badge">Enchères actives : <strong>{{ auctionStats.active|default(0) }}</strong></span>
+                    <span class="dash-summary-badge">Lots disponibles : <strong>{{ lotsCount|default(0) }}</strong></span>
+                    <span class="dash-summary-badge">Offres reçues : <strong>{{ auctionStats.totalBids|default(0) }}</strong></span>
+                    <span class="dash-summary-badge">Enchères terminées : <strong>{{ auctionStats.past|default(0) }}</strong></span>
+                </div>
+            </header>
+
+            <div class="luxury-table-container">
+                <table class="luxury-table">
+                    <thead>
+                        <tr>
+                            <th>LOT</th>
+                            <th>ŒUVRE</th>
+                            <th>ARTISTE</th>
+                            <th>PRIX ACTUEL</th>
+                            <th>OFFRES</th>
+                            <th>FIN</th>
+                            <th>STATUT</th>
+                            <th>ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for auction in detailedAuctions %}
+                            {% set effectiveStatus = auction.effectiveStatus %}
+                            {% set isLive = effectiveStatus == 'ACTIVE' %}
+                            <tr>
+                                <td style="font-weight: 700; color: var(--aag-gold);">#{{ "%03d"|format(auction.id) }}</td>
+                                <td>
+                                    <strong style="color: #FFFFFF;">{{ auction.artwork ? auction.artwork.title : auction.artworkTitle }}</strong>
+                                </td>
+                                <td>{{ auction.artwork and auction.artwork.artist ? auction.artwork.artist.name : 'Artiste non assigné' }}</td>
+                                <td style="font-weight: 700; color: #FFFFFF;">
+                                    {{ (auction.currentPrice ?? auction.startingPrice ?? 0)|number_format(2, ',', ' ') }} €
+                                </td>
+                                <td>
+                                    <span style="color: var(--aag-text-muted);">
+                                        {{ auction.winner is not null ? '1 offre' : '0 offre' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span style="color: var(--aag-text-secondary); font-size: 12.5px;">
+                                        {{ auction.endDate|date('d/m/Y H:i') }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if isLive %}
+                                        <span class="luxury-status-pill luxury-status-pill--active">
+                                            <i class="fa fa-circle" style="font-size: 6px;"></i> ACTIVE
+                                        </span>
+                                    {% elseif effectiveStatus == 'SCHEDULED' %}
+                                        <span class="luxury-status-pill luxury-status-pill--scheduled">PLANIFIÉE</span>
+                                    {% else %}
+                                        <span class="luxury-status-pill luxury-status-pill--closed">TERMINÉE</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ path('app_admin_auction_index') }}" class="btn-discrete">
+                                        Voir <i class="fa fa-arrow-right" style="font-size: 10px;"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="8" style="text-align: center; color: var(--aag-text-muted); padding: 24px;">
+                                    Aucun lot d'enchère actuellement enregistré.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        {# =========================================================
+           5. SECTION COMMANDES RÉCENTES
+           ========================================================= #}
+        <section class="dash-table-section" aria-label="Commandes récentes">
+            <header class="dash-table-header">
+                <div class="dash-panel__title-group">
+                    <span class="dash-panel__eyebrow">Transactions & Acquisitions</span>
+                    <h2 class="dash-panel__title">Commandes récentes</h2>
+                </div>
+
+                <a href="{{ ea_url().setController(orderCrudControllerFqcn).setAction('index') }}" class="btn-discrete">
+                    Toutes les commandes <i class="fa fa-arrow-right" style="font-size: 10px;"></i>
+                </a>
+            </header>
+
+            <div class="luxury-table-container">
+                <table class="luxury-table">
+                    <thead>
+                        <tr>
+                            <th>COMMANDE</th>
+                            <th>CLIENT</th>
+                            <th>ŒUVRE</th>
+                            <th>MONTANT</th>
+                            <th>PAIEMENT</th>
+                            <th>STATUT</th>
+                            <th>DATE</th>
+                            <th>ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in recentOrders %}
+                            {% set firstItem = order.items|first %}
+                            {% set isPaid = order.status|upper == 'PAID' %}
+                            <tr>
+                                <td style="font-weight: 700; color: #FFFFFF;">#{{ order.orderNumber }}</td>
+                                <td>
+                                    {% if order.user %}
+                                        {{ order.user.firstName }} {{ order.user.lastName }}
+                                    {% else %}
+                                        <span style="color: var(--aag-text-muted);">Client invité</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if firstItem and firstItem.artwork %}
+                                        {{ firstItem.artworkTitle }}
+                                        {% if order.items|length > 1 %}
+                                            <small style="color: var(--aag-text-muted);"> (+{{ order.items|length - 1 }})</small>
+                                        {% endif %}
+                                    {% else %}
+                                        <span style="color: var(--aag-text-muted);">Œuvre de galerie</span>
+                                    {% endif %}
+                                </td>
+                                <td style="font-weight: 700; color: #FFFFFF;">
+                                    {{ order.totalAmount|number_format(2, ',', ' ') }} €
+                                </td>
+                                <td>
+                                    {% if isPaid %}
+                                        <span class="luxury-status-pill luxury-status-pill--paid">PAYÉ</span>
+                                    {% else %}
+                                        <span class="luxury-status-pill luxury-status-pill--pending">EN ATTENTE</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if isPaid %}
+                                        <span class="luxury-status-pill luxury-status-pill--paid">CONFIRMÉE</span>
+                                    {% elseif order.status|upper == 'CANCELLED' %}
+                                        <span class="luxury-status-pill luxury-status-pill--closed">ANNULÉE</span>
+                                    {% else %}
+                                        <span class="luxury-status-pill luxury-status-pill--pending">EN COURS</span>
+                                    {% endif %}
+                                </td>
+                                <td style="color: var(--aag-text-muted); font-size: 12.5px;">
+                                    {{ order.createdAt|date('d/m/Y') }}
+                                </td>
+                                <td>
+                                    <a href="{{ ea_url().setController(orderCrudControllerFqcn).setAction('detail').setEntityId(order.id) }}" class="btn-discrete">
+                                        Voir <i class="fa fa-arrow-right" style="font-size: 10px;"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="8" style="text-align: center; color: var(--aag-text-muted); padding: 24px;">
+                                    Aucune transaction récente à afficher.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        {# =========================================================
+           6. CATALOGUE & ARTISTES LES PLUS ACTIFS (2 COLONNES)
+           ========================================================= #}
+        <section class="dash-secondary-grid" aria-label="Catalogue et artistes">
+            {# Catalogue Breakdown #}
+            <article class="dash-panel">
+                <header class="dash-panel__header">
+                    <div class="dash-panel__title-group">
+                        <span class="dash-panel__eyebrow">Fonds de Galerie</span>
+                        <h2 class="dash-panel__title">Catalogue</h2>
+                    </div>
+
+                    <a href="{{ ea_url().setController(artworkCrudControllerFqcn).setAction('index') }}" class="btn-discrete">
+                        Gérer <i class="fa fa-arrow-right" style="font-size: 10px;"></i>
+                    </a>
+                </header>
+
+                <div class="catalogue-breakdown">
+                    <div class="catalogue-total-box">
+                        <span>Œuvres enregistrées au catalogue</span>
+                        <strong>{{ catalogueStats.total|default(0) }} œuvres</strong>
+                    </div>
+
+                    <div class="catalogue-segmented-bar" role="progressbar" aria-label="Répartition du catalogue">
+                        <div class="catalogue-segment--available" style="width: {{ catalogueStats.availablePct }}%;" title="Disponibles : {{ catalogueStats.available }} ({{ catalogueStats.availablePct }}%)"></div>
+                        <div class="catalogue-segment--sold" style="width: {{ catalogueStats.soldPct }}%;" title="Vendues : {{ catalogueStats.sold }} ({{ catalogueStats.soldPct }}%)"></div>
+                        <div class="catalogue-segment--auction" style="width: {{ catalogueStats.auctionPct }}%;" title="En enchère : {{ catalogueStats.auction }} ({{ catalogueStats.auctionPct }}%)"></div>
+                    </div>
+
+                    <div class="catalogue-legend">
+                        <div class="catalogue-legend-item">
+                            <span class="catalogue-legend-dot catalogue-legend-dot--available"></span>
+                            <span>Disponibles : <strong>{{ catalogueStats.available|default(0) }}</strong></span>
+                        </div>
+                        <div class="catalogue-legend-item">
+                            <span class="catalogue-legend-dot catalogue-legend-dot--sold"></span>
+                            <span>Vendues : <strong>{{ catalogueStats.sold|default(0) }}</strong></span>
+                        </div>
+                        <div class="catalogue-legend-item">
+                            <span class="catalogue-legend-dot catalogue-legend-dot--auction"></span>
+                            <span>En enchère : <strong>{{ catalogueStats.auction|default(0) }}</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            {# Artistes les plus actifs #}
+            <article class="dash-panel">
+                <header class="dash-panel__header">
+                    <div class="dash-panel__title-group">
+                        <span class="dash-panel__eyebrow">Créateurs & Peintres</span>
+                        <h2 class="dash-panel__title">Artistes les plus actifs</h2>
+                    </div>
+
+                    <a href="{{ ea_url().setController(artistCrudControllerFqcn).setAction('index') }}" class="btn-discrete">
+                        Tous les artistes <i class="fa fa-arrow-right" style="font-size: 10px;"></i>
+                    </a>
+                </header>
+
+                <div class="artist-cards-grid">
+                    {% for artist in topArtists %}
+                        <div class="artist-card-mini">
+                            {% if artist.photo %}
+                                <img src="/uploads/artists/{{ artist.photo }}" alt="{{ artist.name }}" class="artist-card-mini__avatar">
+                            {% else %}
+                                <div class="artist-card-mini__avatar">
+                                    {{ artist.name|slice(0, 2)|upper }}
+                                </div>
+                            {% endif %}
+                            <div class="artist-card-mini__info">
+                                <h4 class="artist-card-mini__name">{{ artist.name }}</h4>
+                                <div class="artist-card-mini__meta">
+                                    <span>{{ artist.country }}</span>
+                                    <strong style="color: var(--aag-gold);">{{ artist.artworks_count }} œuvre{{ artist.artworks_count > 1 ? 's' : '' }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div style="grid-column: span 2; color: var(--aag-text-muted); text-align: center; padding: 20px;">
+                            Aucun artiste répertorié.
+                        </div>
+                    {% endfor %}
+                </div>
+            </article>
+        </section>
+
+        {# =========================================================
+           7. SECTION ALERTES ADMIN ("À TRAITER")
+           ========================================================= #}
+        <section class="dash-alerts-section" aria-label="Alertes administratives et actions requises">
+            <header class="dash-panel__header" style="margin-bottom: 16px;">
+                <div class="dash-panel__title-group">
+                    <span class="dash-panel__eyebrow">Gestion Opérationnelle</span>
+                    <h2 class="dash-panel__title">À traiter</h2>
+                </div>
+
+                <span style="font-size: 13px; color: var(--aag-gold); font-weight: 700;">
+                    {{ adminAlerts.totalCount|default(0) }} élément{{ adminAlerts.totalCount|default(0) > 1 ? 's nécessitent' : ' nécessite' }} votre attention
+                </span>
+            </header>
+
+            <div class="alerts-grid">
+                {% for alert in adminAlerts.items %}
+                    <div class="alert-card-item">
+                        <div class="alert-card-item__top">
+                            <div class="alert-card-item__title">
+                                <i class="fa fa-triangle-exclamation" style="color: var(--aag-gold);"></i>
+                                {{ alert.title }}
+                            </div>
+                            <span class="alert-card-item__count">{{ alert.count }}</span>
+                        </div>
+                        <p class="alert-card-item__desc">{{ alert.label }}</p>
+                    </div>
+                {% else %}
+                    <div style="grid-column: 1 / -1; color: var(--aag-text-muted); text-align: center; padding: 16px;">
+                        Toutes les opérations administratives sont à jour.
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+{% endblock %}

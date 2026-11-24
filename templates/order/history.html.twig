@@ -1,0 +1,95 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes Commandes - Abstract Art Gallery{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .orders-header {
+            margin-bottom: 26px;
+        }
+        .orders-header h1 {
+            font-size: clamp(2.2rem, 4vw, 3.8rem);
+            font-weight: 600;
+            color: var(--aag-text);
+            margin: 0 0 8px;
+            line-height: 0.9;
+            letter-spacing: -0.05em;
+        }
+        .orders-header p {
+            color: var(--aag-text-muted); margin: 0;
+        }
+        .orders-card {
+            background: linear-gradient(180deg, rgba(18,16,13,0.92), rgba(17,17,17,0.8));
+            border-radius: 24px; border: 1px solid rgba(209,169,93,0.18); box-shadow: 0 22px 42px rgba(0,0,0,0.12); overflow: hidden;
+        }
+        .orders-table { width: 100%; border-collapse: collapse; }
+        .orders-table th {
+            background: rgba(255,255,255,0.02); padding: 16px 20px; text-align: left; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--aag-text-muted); border-bottom: 1px solid var(--aag-border);
+        }
+        .orders-table td {
+            padding: 18px 20px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; font-size: 0.95rem; color: var(--aag-text-soft);
+        }
+        .orders-table tr:last-child td { border-bottom: none; }
+        .badge {
+            display: inline-flex; align-items: center; justify-content: center; padding: 6px 10px; border-radius: 999px; background: rgba(169,216,182,0.08); border: 1px solid rgba(169,216,182,0.2); color: var(--aag-success); font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700;
+        }
+        .btn-view {
+            display: inline-block; padding: 8px 12px; background: rgba(209,169,93,0.08); border: 1px solid rgba(209,169,93,0.25); color: var(--aag-accent-soft); border-radius: 999px; text-decoration: none; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="orders-header">
+    <div style="font-size: 14px; color: #64748b; margin-bottom: 10px;">
+        <a href="{{ path('app_account') }}" style="color: #c89b45; text-decoration: none;">&larr; Mon Espace Client</a>
+    </div>
+    <h1>Historique de mes acquisitions</h1>
+    <p>Retrouvez l'ensemble de vos commandes et certificats d'authenticité</p>
+</div>
+
+{% if orders|length > 0 %}
+    <div class="orders-card">
+        <table class="orders-table">
+            <thead>
+                <tr>
+                    <th>N° Commande</th>
+                    <th>Date</th>
+                    <th>Œuvres</th>
+                    <th>Montant Total</th>
+                    <th>Statut</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                    <tr>
+                        <td><strong>{{ order.orderNumber }}</strong></td>
+                        <td>{{ order.createdAt|date('d/m/Y à H:i') }}</td>
+                        <td>{{ order.items|length }} œuvre(s)</td>
+                        <td><strong>{{ order.totalAmount|number_format(2, ',', ' ') }} {{ order.currency }}</strong></td>
+                        <td>
+                            <span class="badge" style="background: #dcfce7; color: #15803d;">
+                                {{ order.status }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{{ path('app_order_confirmation', {id: order.id}) }}" class="btn-view" style="font-size: 12px; padding: 6px 12px;">
+                                Détails & Reçu
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div style="text-align: center; padding: 60px 20px; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0;">
+        <div style="font-size: 48px; margin-bottom: 15px;">📦</div>
+        <h2>Aucune commande enregistrée</h2>
+        <p style="color: #64748b; margin-bottom: 20px;">Vous n'avez pas encore passé de commande d'œuvres d'art.</p>
+        <a href="{{ path('app_catalog_index') }}" class="nav-btn nav-btn-primary">Découvrir le Catalogue</a>
+    </div>
+{% endif %}
+{% endblock %}

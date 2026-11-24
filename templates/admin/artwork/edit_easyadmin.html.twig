@@ -1,0 +1,267 @@
+{% extends '@!EasyAdmin/crud/edit.html.twig' %}
+{% form_theme edit_form with ea.crud.formThemes only %}
+{% form_theme edit_form.images with 'admin/artwork/image_collection_theme.html.twig' %}
+
+{% block configured_stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('styles/admin-artwork-images.css') }}">
+    <style>
+        .form-container { max-width:1100px; margin:40px auto; background:#111111; padding:40px; border-radius:16px; border:1px solid rgba(255,255,255,0.10); box-shadow:0 16px 40px rgba(0,0,0,0.50); color:#FFFFFF; }
+        .form-header h1{font-size:26px;font-weight:800;color:#FFFFFF;margin:0 0 6px 0;letter-spacing:-0.02em}
+        .form-header p{font-size:14px;color:#A3A3A3;margin:0 0 18px 0}
+        .form-divider{height:1px;background:rgba(255,255,255,0.10);margin:18px 0 22px 0;border:none}
+
+        .form-grid { display:grid; grid-template-columns: 1fr; gap:20px; }
+        @media(min-width:980px){ .form-grid { grid-template-columns: 1fr 380px; } }
+        .form-column { display:flex; flex-direction:column; gap:18px }
+
+        .section-title { font-size:12px; color:#C9A227; letter-spacing:0.08em; text-transform:uppercase; font-weight:700; margin-bottom:10px }
+        .section-card { background: transparent; border: none; padding:0; }
+
+        label.form-label{ display:block; font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:#A3A3A3; margin-bottom:8px }
+        .form-row .field-widget{ width:100%; padding:12px 16px; border-radius:8px; border:1px solid rgba(255,255,255,0.12); font-size:14px; outline:none; background:#0B0B0B; color:#FFFFFF; min-height:46px; box-sizing:border-box; transition:border-color 0.15s, box-shadow 0.15s; }
+        .form-row .daily-featured-checkbox{ width:20px; min-height:20px; padding:0; accent-color:#C9A227; }
+        .form-row .field-widget::placeholder{ color: #737373; opacity:1 }
+        .form-row .field-widget:focus{ border-color:#C9A227; box-shadow:0 0 0 2px rgba(201,162,39,0.18); background:#0E0E0E; }
+        textarea.form-textarea{ min-height:160px; resize:vertical; line-height:1.5; padding:13px 14px }
+
+        .upload-area { border:1px dashed rgba(255,255,255,0.16); padding:16px; border-radius:8px; display:flex; align-items:center; justify-content:center; min-height:120px; color:#A3A3A3; background:#0B0B0B }
+        .upload-preview { display:block; max-width:100%; border-radius:8px; border:1px solid rgba(255,255,255,0.10); box-shadow:0 6px 20px rgba(0,0,0,0.4); }
+
+        .form-errors{ margin-top:6px; color:#E0C766; font-size:12.5px; font-weight:600; }
+        .color-analysis-panel{ margin-top:14px; padding:18px; border:1px solid rgba(201,162,39,.25); background:rgba(201,162,39,.035); }
+        .color-analysis-panel p{ color:#A3A3A3; font-size:13px; line-height:1.6; }
+        .color-analysis-row{ display:flex; align-items:center; gap:10px; padding:8px 0; color:#F5F1E9; }
+        .color-analysis-row strong{ flex:1; font-size:13px; font-weight:600; }
+        .color-analysis-swatch{ width:18px; height:18px; border:1px solid rgba(255,255,255,.28); border-radius:50%; }
+        .color-analysis-action{ margin-top:14px; padding:11px 16px; border:1px solid rgba(201,162,39,.55); background:transparent; color:#E0C766; font-weight:700; cursor:pointer; }
+        .color-analysis-action:hover{ background:rgba(201,162,39,.1); }
+        .color-analysis-date{ margin-top:12px; color:#737373; font-size:11px; }
+        .form-actions{ display:flex; justify-content:flex-end; gap:12px; margin-top:24px; border-top:1px solid rgba(255,255,255,0.10); padding-top:20px; }
+        .btn-cancel{ background:#0B0B0B; color:#FFFFFF; padding:12px 20px; border-radius:8px; text-decoration:none; font-size:14px; font-weight:600; border:1px solid rgba(255,255,255,0.12); transition:border-color 0.15s; }
+        .btn-cancel:hover { border-color:#C9A227; color:#C9A227; }
+        .btn-submit{ background:#C9A227; color:#050505; padding:12px 24px; border-radius:8px; border:none; font-size:14px; font-weight:700; cursor:pointer; transition:background 0.15s; }
+        .btn-submit:hover{ background:#E0C766; }
+
+        @media(max-width:640px){ .form-container{ padding:20px; margin:18px } .form-grid{ grid-template-columns:1fr } .form-actions{ flex-direction:column-reverse; align-items:stretch } .btn-cancel,.btn-submit{ width:100%; justify-content:center } }
+    </style>
+{% endblock %}
+
+{% block main %}
+    <div class="form-container" role="main" aria-labelledby="artwork-form-title">
+        <div class="form-header">
+            <h1 id="artwork-form-title">Modifier l'Œuvre</h1>
+            <p>Modifiez les informations de l’œuvre et vérifiez les champs avant validation.</p>
+            <div class="form-divider" aria-hidden="true"></div>
+        </div>
+
+        {{ form_start(edit_form, {'attr': {'class': 'artwork-form', 'autocomplete': 'off', 'novalidate': 'novalidate'}, 'enctype': 'multipart/form-data'}) }}
+
+            <div class="form-grid">
+
+                <div class="form-column">
+
+                    <div class="section">
+                        <div class="section-title">Informations de l'œuvre</div>
+                        <div class="section-card">
+                            <div class="form-row">
+                                {{ form_label(edit_form.title) }}
+                                {{ form_widget(edit_form.title, {'attr': {'class': 'field-widget', 'maxlength': 255}}) }}
+                                <div class="form-errors">{{ form_errors(edit_form.title) }}</div>
+                            </div>
+
+                            <div class="form-row">
+                                {{ form_label(edit_form.technique) }}
+                                {{ form_widget(edit_form.technique, {'attr': {'class': 'field-widget', 'maxlength': 255}}) }}
+                                <div class="form-errors">{{ form_errors(edit_form.technique) }}</div>
+                            </div>
+
+                            <div class="form-row">
+                                {{ form_label(edit_form.dimensions) }}
+                                {{ form_widget(edit_form.dimensions, {'attr': {'class': 'field-widget', 'maxlength': 255}}) }}
+                                <div class="form-errors">{{ form_errors(edit_form.dimensions) }}</div>
+                            </div>
+
+                            <div class="form-row">
+                                {{ form_label(edit_form.description) }}
+                                {{ form_widget(edit_form.description, {'attr': {'class': 'field-widget form-textarea', 'maxlength': 2000}}) }}
+                                <div class="form-errors">{{ form_errors(edit_form.description) }}</div>
+                            </div>
+
+                            {% if edit_form.yearCreated is defined %}
+                                <div class="form-row">
+                                    {{ form_label(edit_form.yearCreated) }}
+                                    {{ form_widget(edit_form.yearCreated, {'attr': {'class': 'field-widget'}}) }}
+                                    <div class="form-errors">{{ form_errors(edit_form.yearCreated) }}</div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">Artiste & catégorie</div>
+                        <div class="section-card">
+                            <div class="form-row">
+                                {{ form_label(edit_form.artist) }}
+                                {{ form_widget(edit_form.artist, {'attr': {'class': 'field-widget'}}) }}
+                                <div class="form-errors">{{ form_errors(edit_form.artist) }}</div>
+                            </div>
+
+                            <div class="form-row">
+                                {{ form_label(edit_form.category) }}
+                                {{ form_widget(edit_form.category, {'attr': {'class': 'field-widget'}}) }}
+                                <div class="form-errors">{{ form_errors(edit_form.category) }}</div>
+                            </div>
+
+                            <div class="form-row">
+                                {{ form_label(edit_form.colors) }}
+                                {{ form_widget(edit_form.colors, {'attr': {'class': 'field-widget'}}) }}
+                                {{ form_help(edit_form.colors) }}
+                                <div class="form-errors">{{ form_errors(edit_form.colors) }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">Informations commerciales</div>
+                        <div class="section-card">
+                            <div class="form-row">
+                                {{ form_label(edit_form.price) }}
+                                {{ form_widget(edit_form.price, {'attr': {'class': 'field-widget'}}) }}
+                                <div class="form-errors">{{ form_errors(edit_form.price) }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="form-column">
+
+                    <div class="section">
+                        <div class="section-title">Média</div>
+                        <div class="section-card">
+                            <div class="upload-drop">
+                                <div class="upload-area">
+                                    <div class="upload-hint">Cliquez ou glissez-déposez une image<br><small class="small">JPG, PNG, WEBP</small></div>
+                                    {{ form_widget(edit_form.photo, {'attr': {'class': 'field-widget', 'accept': 'image/jpeg,image/png,image/webp'}}) }}
+                                </div>
+                                <div>
+                                    <div class="small">Aperçu</div>
+                                    <img id="upload-preview" class="upload-preview" src="" alt="Aperçu image" style="display:none" />
+                                </div>
+                            </div>
+                            <div class="form-errors">{{ form_errors(edit_form.photo) }}</div>
+                            {{ form_row(edit_form.images) }}
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">Publication</div>
+                        <div class="section-card">
+                            <div class="form-row">
+                                {{ form_label(edit_form.status) }}
+                                {{ form_widget(edit_form.status, {'attr': {'class': 'field-widget'}}) }}
+                                <div class="form-errors">{{ form_errors(edit_form.status) }}</div>
+                            </div>
+
+                            {% if edit_form.dailyFeatured is defined %}
+                                <div class="form-row">
+                                    {{ form_label(edit_form.dailyFeatured) }}
+                                    {{ form_widget(edit_form.dailyFeatured, {'attr': {'class': 'field-widget daily-featured-checkbox'}}) }}
+                                    {{ form_help(edit_form.dailyFeatured) }}
+                                    <div class="form-errors">{{ form_errors(edit_form.dailyFeatured) }}</div>
+                                </div>
+                            {% endif %}
+
+                            {% if edit_form.publishedAt is defined %}
+                                <div class="form-row">
+                                    {{ form_label(edit_form.publishedAt) }}
+                                    {{ form_widget(edit_form.publishedAt, {'attr': {'class': 'field-widget'}}) }}
+                                    <div class="form-errors">{{ form_errors(edit_form.publishedAt) }}</div>
+                                </div>
+                            {% endif %}
+
+                            {% if edit_form.published is defined %}
+                                <div class="form-row">
+                                    {{ form_label(edit_form.published) }}
+                                    {{ form_widget(edit_form.published, {'attr': {'class': 'field-widget'}}) }}
+                                    <div class="form-errors">{{ form_errors(edit_form.published) }}</div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">Analyse des couleurs IA</div>
+                        <div class="section-card color-analysis-panel">
+                            <p>Extraction locale des couleurs dominantes depuis l’image principale. Aucune image n’est envoyée à une API externe.</p>
+                            {% set colorAnalyses = edit_form.vars.data.colorAnalyses %}
+                            {% if colorAnalyses is empty %}
+                                <p>Aucune palette n’a encore été analysée.</p>
+                            {% else %}
+                                {% for analysis in colorAnalyses %}
+                                    <div class="color-analysis-row">
+                                        <span class="color-analysis-swatch" style="background-color: {{ analysis.hexCode }}" aria-hidden="true"></span>
+                                        <strong>{{ analysis.color.name }}</strong>
+                                        <span>{{ analysis.percentage|number_format(0, ',', ' ') }}%</span>
+                                    </div>
+                                    {% if loop.first %}
+                                        <div class="color-analysis-date">Analysée le {{ analysis.analyzedAt|date('d/m/Y à H:i') }}</div>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                            <button class="color-analysis-action" type="submit" form="analyze-artwork-colors-{{ edit_form.vars.data.id }}">
+                                {{ colorAnalyses is empty ? '🎨 Analyser les couleurs' : '↻ Réanalyser' }}
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="form-actions" role="group" aria-label="Actions du formulaire">
+                <a href="javascript:history.back()" class="btn-cancel">Annuler</a>
+                <button type="submit" class="btn-submit">Enregistrer les modifications</button>
+            </div>
+
+        {{ form_end(edit_form) }}
+        <form id="analyze-artwork-colors-{{ edit_form.vars.data.id }}" method="post" action="{{ path('admin_artwork_analyze_colors', {id: edit_form.vars.data.id}) }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('analyze-colors-' ~ edit_form.vars.data.id) }}">
+        </form>
+    </div>
+{% endblock %}
+
+{% block configured_javascripts %}
+    {{ parent() }}
+    <script type="module" src="{{ asset('admin-artwork-images.js') }}"></script>
+    <script>
+        (function () {
+            // Prefer selecting the file input inside the upload-area; fallback to id selector
+            const fileInput = document.querySelector('.upload-area input[type="file"]') || document.querySelector('[id$="_photo"]');
+            const preview = document.getElementById('upload-preview');
+            if (fileInput && preview) {
+                // Show existing image if field has a data attribute (server-side preview not provided here)
+                fileInput.addEventListener('change', function (e) {
+                    const file = e.target.files && e.target.files[0];
+                    if (!file) { preview.style.display = 'none'; preview.src = ''; return; }
+                    if (!file.type || !file.type.startsWith('image/')) { preview.style.display = 'none'; preview.src = ''; return; }
+                    const reader = new FileReader();
+                    reader.onload = function (ev) { preview.src = ev.target.result; preview.style.display = 'block'; };
+                    reader.readAsDataURL(file);
+                });
+
+                const uploadArea = document.querySelector('.upload-area');
+                if (uploadArea) {
+                    ['dragenter','dragover'].forEach(evt => uploadArea.addEventListener(evt, function (ev) { ev.preventDefault(); uploadArea.style.borderColor = 'rgba(201,164,76,0.18)'; }));
+                    ['dragleave','drop'].forEach(evt => uploadArea.addEventListener(evt, function (ev) { ev.preventDefault(); uploadArea.style.borderColor = 'rgba(255,255,255,0.06)'; }));
+                    uploadArea.addEventListener('drop', function (ev) {
+                        const dt = ev.dataTransfer; if (!dt || !dt.files || !dt.files.length) return;
+                        fileInput.files = dt.files;
+                        fileInput.dispatchEvent(new Event('change'));
+                    });
+                }
+            }
+        })();
+    </script>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes favoris - Abstract Art Gallery{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('styles/artwork-gallery.css') }}">
+    <link rel="stylesheet" href="{{ asset('styles/favorites.css') }}">
+{% endblock %}
+
+{% block body %}
+    <section class="favorites-page" aria-labelledby="favorites-title">
+        <header class="favorites-header">
+            <span class="aag-section-label">Votre sélection</span>
+            <h1 id="favorites-title">MES FAVORIS</h1>
+            <p>Retrouvez ici les œuvres que vous souhaitez conserver.</p>
+        </header>
+
+        <div id="favorite-artworks">
+            {% if artworks is not empty %}
+                {{ include('catalog/_artworks_grid.html.twig', {artworks: artworks, favoriteArtworkIds: favoriteArtworkIds}) }}
+            {% endif %}
+            <div class="favorites-empty"{% if artworks is not empty %} hidden{% endif %} data-favorites-empty>
+                <span class="favorites-empty-heart" aria-hidden="true">♡</span>
+                <p>Vous n'avez encore aucune œuvre favorite.</p>
+                <a class="aag-button aag-button--secondary" href="{{ path('app_catalog_index') }}">Explorer les œuvres →</a>
+            </div>
+        </div>
+    </section>
+{% endblock %}

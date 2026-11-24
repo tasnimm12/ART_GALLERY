@@ -1,0 +1,218 @@
+{% extends '@!EasyAdmin/crud/edit.html.twig' %}
+{% form_theme edit_form with ea.crud.formThemes only %}
+
+{% block configured_stylesheets %}
+    {{ parent() }}
+    <style>
+        .form-container { max-width: 820px; margin: 40px auto; background: #111111; padding: 35px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.10); box-shadow: 0 16px 40px rgba(0, 0, 0, 0.50); color: #FFFFFF; }
+        .form-header h1 { font-size: 26px; font-weight: 800; color: #FFFFFF; margin: 0 0 6px 0; letter-spacing: -0.02em; }
+        .form-header p { font-size: 14px; color: #A3A3A3; margin: 0 0 18px 0; }
+        .form-divider { height: 1px; background: rgba(255, 255, 255, 0.10); margin: 18px 0 22px 0; border: none; }
+        .form-row { margin-bottom: 20px; }
+        .form-row label { display: block; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #A3A3A3; margin-bottom: 8px; }
+        .form-row .field-widget { width: 100%; padding: 12px 16px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.12); font-size: 14px; outline: none; background: #0B0B0B; color: #FFFFFF; box-sizing: border-box; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
+        .form-row .field-widget:focus { border-color: #C9A227; background: #0E0E0E; box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.18); }
+        .field-widget.is-invalid { border-color: rgba(255, 255, 255, 0.40); background: #0E0E0E; box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.10); }
+        .form-errors { margin-top: 6px; color: #E0C766; font-size: 12.5px; font-weight: 600; }
+        .form-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; border-top: 1px solid rgba(255, 255, 255, 0.10); padding-top: 20px; }
+        .btn-cancel { background: #0B0B0B; color: #FFFFFF; padding: 12px 20px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(255, 255, 255, 0.12); transition: border-color 0.15s; }
+        .btn-cancel:hover { border-color: #C9A227; color: #C9A227; }
+        .btn-submit { background: #C9A227; color: #050505; padding: 12px 24px; border-radius: 8px; border: none; font-size: 14px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; transition: background 0.15s; }
+        .btn-submit:hover { background: #E0C766; }
+        @media (max-width: 640px) { .form-container { padding: 20px; margin: 18px; } .form-actions { flex-direction: column-reverse; align-items: stretch; } .btn-cancel, .btn-submit { width: 100%; justify-content: center; } }
+    </style>
+{% endblock %}
+
+{% block main %}
+    <div class="form-container" role="main" aria-labelledby="user-form-title">
+        <div class="form-header">
+            <h1 id="user-form-title">✏️ Modifier l'Utilisateur</h1>
+            <p>Vérifiez les informations du compte avant de valider les changements.</p>
+            <div class="form-divider" aria-hidden="true"></div>
+        </div>
+
+        {{ form_start(edit_form, {'attr': {'class': 'user-form', 'autocomplete': 'off', 'novalidate': 'novalidate'}}) }}
+
+            {% if edit_form.email is defined %}
+                <div class="form-row">
+                    {{ form_label(edit_form.email) }}
+                    <div>
+                        {{ form_widget(edit_form.email, {'attr': {'class': 'field-widget'}}) }}
+                        <div class="form-errors">{{ form_errors(edit_form.email) }}</div>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if edit_form.firstName is defined %}
+                <div class="form-row">
+                    {{ form_label(edit_form.firstName) }}
+                    <div>
+                        {{ form_widget(edit_form.firstName, {'attr': {'class': 'field-widget'}}) }}
+                        <div class="form-errors">{{ form_errors(edit_form.firstName) }}</div>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if edit_form.lastName is defined %}
+                <div class="form-row">
+                    {{ form_label(edit_form.lastName) }}
+                    <div>
+                        {{ form_widget(edit_form.lastName, {'attr': {'class': 'field-widget'}}) }}
+                        <div class="form-errors">{{ form_errors(edit_form.lastName) }}</div>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if edit_form.phone is defined %}
+                <div class="form-row">
+                    {{ form_label(edit_form.phone) }}
+                    <div>
+                        {{ form_widget(edit_form.phone, {'attr': {'class': 'field-widget'}}) }}
+                        <div class="form-errors">{{ form_errors(edit_form.phone) }}</div>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if edit_form.status is defined %}
+                <div class="form-row">
+                    {{ form_label(edit_form.status) }}
+                    <div>
+                        {{ form_widget(edit_form.status, {'attr': {'class': 'field-widget'}}) }}
+                        <div class="form-errors">{{ form_errors(edit_form.status) }}</div>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if edit_form.roles is defined %}
+                <div class="form-row">
+                    {{ form_label(edit_form.roles) }}
+                    <div>
+                        {{ form_widget(edit_form.roles, {'attr': {'class': 'field-widget'}}) }}
+                        <div class="form-errors">{{ form_errors(edit_form.roles) }}</div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="form-actions" role="group" aria-label="Actions du formulaire">
+                <a href="javascript:history.back()" class="btn-cancel">Annuler</a>
+                <button type="submit" class="btn-submit">Enregistrer l'utilisateur</button>
+            </div>
+
+        {{ form_end(edit_form) }}
+    </div>
+{% endblock %}
+
+{% block configured_javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.querySelector('.user-form');
+            if (!form) {
+                return;
+            }
+
+            const setError = function (field, message) {
+                if (!field) {
+                    return;
+                }
+                field.classList.add('is-invalid');
+                const row = field.closest('.form-row');
+                if (!row) {
+                    return;
+                }
+                const errorBox = row.querySelector('.form-errors');
+                if (errorBox) {
+                    errorBox.textContent = message;
+                }
+            };
+
+            const clearError = function (field) {
+                if (!field) {
+                    return;
+                }
+                field.classList.remove('is-invalid');
+                const row = field.closest('.form-row');
+                if (!row) {
+                    return;
+                }
+                const errorBox = row.querySelector('.form-errors');
+                if (errorBox) {
+                    errorBox.textContent = '';
+                }
+            };
+
+            const fields = [
+                form.querySelector('#user_email'),
+                form.querySelector('#user_firstName'),
+                form.querySelector('#user_lastName'),
+                form.querySelector('#user_phone'),
+                form.querySelector('#user_status'),
+                form.querySelector('#user_roles')
+            ];
+
+            const validateForm = function () {
+                let valid = true;
+                fields.forEach(clearError);
+
+                const emailField = form.querySelector('#user_email');
+                if (emailField) {
+                    const value = (emailField.value || '').trim();
+                    if (!value) {
+                        setError(emailField, 'L\'email est obligatoire.');
+                        valid = false;
+                    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                        setError(emailField, 'Veuillez saisir un email valide.');
+                        valid = false;
+                    }
+                }
+
+                const firstNameField = form.querySelector('#user_firstName');
+                if (firstNameField) {
+                    const value = (firstNameField.value || '').trim();
+                    if (!value) {
+                        setError(firstNameField, 'Le prénom est obligatoire.');
+                        valid = false;
+                    }
+                }
+
+                const lastNameField = form.querySelector('#user_lastName');
+                if (lastNameField) {
+                    const value = (lastNameField.value || '').trim();
+                    if (!value) {
+                        setError(lastNameField, 'Le nom est obligatoire.');
+                        valid = false;
+                    }
+                }
+
+                const phoneField = form.querySelector('#user_phone');
+                if (phoneField && phoneField.value && !/^[0-9+().\s-]{7,30}$/.test(phoneField.value.trim())) {
+                    setError(phoneField, 'Le téléphone n\'est pas valide.');
+                    valid = false;
+                }
+
+                const statusField = form.querySelector('#user_status');
+                if (statusField && statusField.value === '') {
+                    setError(statusField, 'Le statut est obligatoire.');
+                    valid = false;
+                }
+
+                return valid;
+            };
+
+            fields.forEach(function (field) {
+                if (!field) {
+                    return;
+                }
+                field.addEventListener('input', function () { clearError(field); });
+                field.addEventListener('change', function () { clearError(field); });
+            });
+
+            form.addEventListener('submit', function (event) {
+                if (!validateForm()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+            });
+        });
+    </script>
+{% endblock %}

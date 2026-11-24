@@ -1,0 +1,33 @@
+{# @var ea \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext #}
+{# Hidden form for POST-based actions (like DELETE) with CSRF protection #}
+<form class="d-none" method="post" id="action-confirmation-form">
+    {% guard function csrf_token %}
+        <input type="hidden" name="token" value="{{ csrf_token('ea-delete') }}" />
+    {% endguard %}
+</form>
+
+<div id="modal-action-confirmation" class="modal fade" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content admin-confirmation-modal">
+            <div class="modal-header admin-confirmation-header">
+                <div class="admin-confirmation-icon">!</div>
+                <div>
+                    <h4 id="action-confirmation-title">Supprimer cet élément ?</h4>
+                    <p>Cette action est irréversible.</p>
+                </div>
+            </div>
+            <div class="modal-body admin-confirmation-body">
+                <p>La suppression supprimera définitivement cet enregistrement ainsi que les données associées.</p>
+            </div>
+            <div class="modal-footer admin-confirmation-footer">
+                <twig:ea:Button type="button" data-bs-dismiss="modal" class="admin-secondary-btn">
+                    Annuler
+                </twig:ea:Button>
+
+                <twig:ea:Button type="button" variant="danger" data-bs-dismiss="modal" id="modal-action-confirmation-button" class="admin-danger-btn">
+                    Supprimer
+                </twig:ea:Button>
+            </div>
+        </div>
+    </div>
+</div>

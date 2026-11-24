@@ -1,0 +1,51 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block content %}
+<h1>Gestion des Paiements</h1>
+
+<table style="width:100%;border-collapse:collapse;">
+    <thead>
+        <tr style="text-align:left;border-bottom:1px solid #333;">
+            <th>ID</th>
+            <th>Commande</th>
+            <th>Utilisateur</th>
+            <th>Montant</th>
+            <th>Méthode</th>
+            <th>Statut</th>
+            <th>Créé le</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for payment in payments %}
+            <tr style="border-bottom:1px solid #222;">
+                <td>{{ payment.id }}</td>
+                <td>{{ payment.order ? payment.order.orderNumber : '—' }}</td>
+                <td>{{ payment.order and payment.order.user ? payment.order.user.email : '—' }}</td>
+                <td>{{ payment.amount }} {{ payment.currency }}</td>
+                <td>{{ payment.method }}</td>
+                <td>{{ payment.status }}</td>
+                <td>{{ payment.createdAt ? payment.createdAt|date('Y-m-d H:i') : '—' }}</td>
+                <td>
+                    {% if payment.status == 'PENDING' %}
+                        <form method="post" action="{{ path('admin_payment_accept', {'id': payment.id}) }}" style="display:inline">
+                            <input type="hidden" name="_token" value="{{ csrf_token('accept-payment-' ~ payment.id) }}">
+                            <button class="action-btn" style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;border:none;">Accepter</button>
+                        </form>
+
+                        <form method="post" action="{{ path('admin_payment_decline', {'id': payment.id}) }}" style="display:inline;margin-left:6px;">
+                            <input type="hidden" name="_token" value="{{ csrf_token('decline-payment-' ~ payment.id) }}">
+                            <button class="action-btn" style="background:#ef4444;color:#fff;padding:6px 10px;border-radius:6px;border:none;">Refuser</button>
+                        </form>
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="8">Aucun paiement trouvé.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

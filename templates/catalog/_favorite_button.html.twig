@@ -1,0 +1,16 @@
+{% set isFavorite = artwork.id in (favoriteArtworkIds|default([])) %}
+<button
+    type="button"
+    class="favorite-button {{ buttonClass|default('') }}{{ isFavorite ? ' is-favorite' : '' }}"
+    aria-label="{{ isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris' }}"
+    aria-pressed="{{ isFavorite ? 'true' : 'false' }}"
+    data-favorite-toggle
+    data-favorite-url="{{ path('app_favorite_toggle', {id: artwork.id}) }}"
+    data-favorite-token="{{ csrf_token('favorite_' ~ artwork.id) }}"
+    data-login-url="{{ path('app_login') }}"
+    data-favorited="{{ isFavorite ? 'true' : 'false' }}"
+    data-authenticated="{{ app.user ? 'true' : 'false' }}"
+>
+    <span class="favorite-button-icon" aria-hidden="true">{{ isFavorite ? '♥' : '♡' }}</span>
+    <span class="{{ buttonClass|default('') == 'favorite-button--detail' ? '' : 'sr-only' }}" data-favorite-label>{{ isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris' }}</span>
+</button>

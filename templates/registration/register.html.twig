@@ -1,0 +1,174 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Inscription - Abstract Art Gallery{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .auth-container {
+            max-width: 520px;
+            margin: 40px auto;
+            padding: 35px 30px;
+            background: var(--aag-surface-light);
+            color: var(--aag-surface-light-text);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        .auth-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .auth-header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--aag-surface-light-text);
+            margin-bottom: 8px;
+        }
+        .auth-header p {
+            font-size: 14px;
+            color: var(--aag-surface-light-muted);
+            margin: 0;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--aag-surface-light-text);
+            margin-bottom: 6px;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            font-size: 14px;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            box-sizing: border-box;
+            transition: border-color 0.15s ease-in-out;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--aag-accent);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+        }
+        .form-error {
+            color: #e53e3e;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: var(--aag-surface-light-muted);
+        }
+        .checkbox-group input {
+            margin-right: 8px;
+            margin-top: 3px;
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #ffffff;
+            background: var(--aag-accent);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .btn-submit:hover,
+        .btn-submit:focus-visible {
+            background: var(--aag-accent-hover);
+        }
+        .auth-footer {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 14px;
+            color: var(--aag-surface-light-muted);
+        }
+        .auth-footer a {
+            color: var(--aag-accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .auth-footer a:hover,
+        .auth-footer a:focus-visible {
+            text-decoration: underline;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="auth-container">
+    <div class="auth-header">
+        <h1>Créer un compte</h1>
+        <p>Rejoignez la communauté Abstract Art Gallery</p>
+    </div>
+
+    {{ form_errors(registrationForm) }}
+
+    {{ form_start(registrationForm, {'attr': {'novalidate': 'novalidate'}}) }}
+        <div class="form-row">
+            <div class="form-group">
+                {{ form_label(registrationForm.firstName, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(registrationForm.firstName) }}
+                {{ form_errors(registrationForm.firstName) }}
+            </div>
+            <div class="form-group">
+                {{ form_label(registrationForm.lastName, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(registrationForm.lastName) }}
+                {{ form_errors(registrationForm.lastName) }}
+            </div>
+        </div>
+
+        <div class="form-group">
+            {{ form_label(registrationForm.email, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(registrationForm.email) }}
+            {{ form_errors(registrationForm.email) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(registrationForm.phone, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(registrationForm.phone) }}
+            {{ form_errors(registrationForm.phone) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(registrationForm.plainPassword.first, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(registrationForm.plainPassword.first) }}
+            {{ form_errors(registrationForm.plainPassword.first) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(registrationForm.plainPassword.second, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(registrationForm.plainPassword.second) }}
+            {{ form_errors(registrationForm.plainPassword.second) }}
+        </div>
+
+        <div class="checkbox-group">
+            {{ form_widget(registrationForm.agreeTerms) }}
+            {{ form_label(registrationForm.agreeTerms) }}
+        </div>
+        {{ form_errors(registrationForm.agreeTerms) }}
+
+        <button type="submit" class="btn-submit">S'inscrire</button>
+    {{ form_end(registrationForm) }}
+
+    <div class="auth-footer">
+        Vous avez déjà un compte ? <a href="{{ path('app_login') }}">Connectez-vous</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,287 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Validation & Paiement de votre commande - Abstract Art Gallery{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('styles/checkout-map.css') }}">
+    <style>
+        .checkout-layout {
+            display: grid; grid-template-columns: 1.6fr 1fr; gap: 35px; margin-top: 25px;
+        }
+        @media (max-width: 860px) { .checkout-layout { grid-template-columns: 1fr; } }
+
+        .checkout-header h1 {
+            font-size: clamp(2.3rem, 4vw, 4rem); font-weight: 600; color: var(--aag-text); margin: 0 0 8px; line-height: 0.9; letter-spacing: -0.05em;
+        }
+        .checkout-header p { color: var(--aag-text-muted); margin: 0; }
+
+        .checkout-card {
+            background: linear-gradient(180deg, rgba(18,16,13,0.92), rgba(17,17,17,0.8)); border-radius: 24px; border: 1px solid rgba(209,169,93,0.18); padding: 28px 24px; box-shadow: 0 22px 42px rgba(0,0,0,0.12); margin-bottom: 24px;
+        }
+        .checkout-card h2 {
+            font-size: 1.25rem; font-weight: 700; color: var(--aag-text); margin: 0 0 18px; padding-bottom: 12px; border-bottom: 1px solid var(--aag-border);
+        }
+
+        .form-row { display: flex; gap: 16px; }
+        .form-row .form-group { flex: 1; }
+        .form-group { margin-bottom: 16px; }
+        .form-label { display: block; font-size: 0.78rem; font-weight: 700; color: var(--aag-text-soft); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; }
+        .form-control {
+            width: 100%; padding: 12px 14px; font-size: 0.96rem; border: 1px solid rgba(209,169,93,0.22); border-radius: 12px; background: rgba(255,255,255,0.02); color: var(--aag-text);
+        }
+        .form-control:focus { outline: none; border-color: rgba(209,169,93,0.8); box-shadow: 0 0 0 3px rgba(209,169,93,0.12); }
+
+        .payment-options { display: flex; flex-direction: column; gap: 12px; }
+        .payment-option-label {
+            display: flex; align-items: center; padding: 14px 16px; border: 1px solid rgba(209,169,93,0.2); border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.92rem; color: var(--aag-text-soft); background: rgba(255,255,255,0.02); transition: all 0.15s ease;
+        }
+        .payment-option-label:hover { border-color: rgba(209,169,93,0.5); background: rgba(209,169,93,0.05); }
+        .payment-option-label input { margin-right: 12px; }
+
+        .summary-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .summary-item strong { color: var(--aag-text); }
+        .btn-pay-now {
+            width: 100%; padding: 16px; background: linear-gradient(135deg, var(--aag-accent), var(--aag-accent-warm)); color: #130f0b; border: none; border-radius: 14px; font-weight: 800; font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; margin-top: 25px;
+        }
+        .security-badge {
+            display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.76rem; color: var(--aag-text-muted); margin-top: 15px; letter-spacing: 0.08em; text-transform: uppercase;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="checkout-header">
+    <div style="font-size: 14px; color: #64748b; margin-bottom: 10px;">
+        <a href="{{ path('app_cart_index') }}" style="color: #c89b45; text-decoration: none;">&larr; Revenir au panier</a>
+    </div>
+    <h1>Finalisation de la commande</h1>
+    <p>Renseignez vos coordonnées de livraison sécurisée et validez votre règlement</p>
+</div>
+
+{{ form_start(form, { attr: { novalidate: 'novalidate' } }) }}
+<div class="checkout-layout">
+    <div>
+        <div class="checkout-card">
+            <h2>1. Adresse de livraison & Facturation</h2>
+
+            <div class="form-group">
+                {{ form_label(form.address, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.address) }}
+                {{ form_errors(form.address) }}
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    {{ form_label(form.postalCode, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.postalCode) }}
+                    {{ form_errors(form.postalCode) }}
+                </div>
+                <div class="form-group">
+                    {{ form_label(form.city, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.city) }}
+                    {{ form_errors(form.city) }}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    {{ form_label(form.country, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.country) }}
+                    {{ form_errors(form.country) }}
+                </div>
+                <div class="form-group">
+                    {{ form_label(form.phone, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.phone) }}
+                    {{ form_errors(form.phone) }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.notes, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.notes) }}
+                {{ form_errors(form.notes) }}
+            </div>
+
+            <div class="checkout-map-section">
+                <div class="checkout-map-section__heading">
+                    <h3>📍 Localiser votre adresse</h3>
+                    <p>Cliquez sur la carte ou recherchez l’adresse saisie pour la sélectionner.</p>
+                </div>
+                <div class="checkout-map-actions">
+                    <button type="button" id="checkout-map-search" class="checkout-map-button">🔎 Rechercher sur la carte</button>
+                    <button type="button" id="checkout-map-geolocation" class="checkout-map-button checkout-map-button--secondary">📍 Utiliser ma position</button>
+                </div>
+                <div id="checkout-map-message" class="checkout-map-message" role="status" aria-live="polite"></div>
+                <div id="checkout-map" class="checkout-map" aria-label="Carte interactive de sélection de l’adresse"></div>
+                {{ form_widget(form.latitude) }}
+                {{ form_widget(form.longitude) }}
+            </div>
+        </div>
+
+        <div class="checkout-card">
+            <h2>2. Mode de Règlement Sécurisé</h2>
+            <div class="payment-options">
+                {% for child in form.paymentMethod %}
+                    <label class="payment-option-label">
+                        {{ form_widget(child) }}
+                        <span>{{ child.vars.label }}</span>
+                    </label>
+                {% endfor %}
+            </div>
+            {{ form_errors(form.paymentMethod) }}
+        </div>
+    </div>
+
+    <div>
+        <div class="checkout-card" style="position: sticky; top: 90px;">
+            <h2>Votre Commande</h2>
+
+            {% for item in items %}
+                {% set artwork = item.artwork %}
+                <div class="summary-item">
+                    <div>
+                        <div style="font-weight: 700; color: #0f172a;">{{ artwork.title }}</div>
+                        <div style="font-size: 12px; color: #64748b;">Par {{ artwork.artist.name }}</div>
+                    </div>
+                    <div style="font-weight: 700; color: #0f172a;">
+                        {{ item.price|number_format(2, ',', ' ') }} €
+                    </div>
+                </div>
+            {% endfor %}
+
+            <div style="margin-top: 15px;">
+                <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px;">
+                    <span>Assurance transport d'art</span>
+                    <span style="color: #10b981; font-weight: 600;">Offerte</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px;">
+                    <span>Certificat d'authenticité</span>
+                    <span style="color: #10b981; font-weight: 600;">Inclus</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 20px; font-weight: 800; border-top: 2px solid #e2e8f0; padding-top: 12px; margin-top: 12px;">
+                    <span>Total à régler</span>
+                    <span>{{ total|number_format(2, ',', ' ') }} €</span>
+                </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:10px;">
+                <button type="submit" class="btn-pay-now">
+                    Payer {{ total|number_format(2, ',', ' ') }} €
+                </button>
+
+                {% if not stripe_configured %}
+                    <div style="background:#fff4f4;border:1px solid #fecaca;padding:10px;border-radius:8px;color:#9f1239;font-weight:700;">Stripe n'est pas configuré sur ce serveur. Pour activer le paiement par Stripe, ajoutez STRIPE_SECRET_KEY et STRIPE_PUBLISHABLE_KEY dans votre fichier <code>.env.local</code>.</div>
+                    <button type="button" id="stripe-pay-btn" class="btn-pay-now" style="background:#9ca3af;cursor:not-allowed;" disabled title="Stripe non configuré">
+                        Payer avec Stripe (Checkout)
+                    </button>
+                {% else %}
+                    <button type="button" id="stripe-pay-btn" class="btn-pay-now" style="background:#c89b45;" onclick="selectStripeAndSubmit(event);">
+                        Payer avec Stripe (Checkout)
+                    </button>
+                {% endif %}
+
+                <div class="security-badge">
+                    <span>Paiement 100% Chiffré &amp; Garanti</span>
+                </div>
+            </div>
+
+            <script>
+                async function selectStripeAndSubmit(e) {
+                    if (e && typeof e.preventDefault === 'function') e.preventDefault();
+                    // Find and check the radio/input with value STRIPE
+                    const stripeInput = document.querySelector('input[type=radio][value="STRIPE"]');
+                    if (stripeInput) {
+                        stripeInput.checked = true;
+                    } else {
+                        const inputs = document.querySelectorAll('input[type=radio]');
+                        for (let i=0;i<inputs.length;i++){
+                            if (inputs[i].value === 'STRIPE') { inputs[i].checked = true; break; }
+                        }
+                    }
+
+                    const btn = document.getElementById('stripe-pay-btn');
+                    const form = btn ? btn.closest('form') : document.querySelector('form');
+                    if (!form) { return; }
+
+                    // Simple client-side validation to avoid server-side 422
+                    const requiredFields = ['address','postalCode','city','phone'];
+                    for (let i=0;i<requiredFields.length;i++){
+                        const name = requiredFields[i];
+                        const input = form.querySelector('[name$="['+name+']"]');
+                        if (!input || !input.value || input.value.trim() === '') {
+                            alert('Veuillez remplir le champ requis: ' + name);
+                            if (input) input.focus();
+                            return;
+                        }
+                    }
+
+                    try {
+                        // 1) Submit form via AJAX to create the Order
+                        const formData = new FormData(form);
+                        const resp = await fetch(form.action, {
+                            method: 'POST',
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                            body: formData,
+                        });
+
+                        if (!resp.ok) {
+                            // If validation error, show response (server may return HTML form with errors)
+                            if (resp.status === 422) {
+                                const text = await resp.text();
+                                document.open(); document.write(text); document.close();
+                                return;
+                            }
+                            // other errors: fallback to full submit
+                            form.submit();
+                            return;
+                        }
+
+                        const json = await resp.json();
+                        if (!json.redirect) {
+                            form.submit();
+                            return;
+                        }
+
+                        // 2) Call the payment_create_checkout endpoint via AJAX to create a Stripe session and receive session URL
+                        const resp2 = await fetch(json.redirect, {
+                            method: 'GET',
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        });
+
+                        if (!resp2.ok) {
+                            // try to read JSON error and show to user
+                            try {
+                                const err = await resp2.json();
+                                if (err && err.error) {
+                                    alert('Erreur Stripe: ' + err.error);
+                                    return;
+                                }
+                            } catch (parseErr) {
+                                // not JSON — fallback
+                            }
+
+                            form.submit();
+                            return;
+                        }
+
+                        const sess = await resp2.json();
+                        if (sess.url) {
+                            // Redirect user to Stripe Checkout in the same tab
+                            window.location.href = sess.url;
+                            return;
+                        }
+
+                        // Fallback: full submit
+                        form.submit();
+                    } catch (e) {
+                        console.error('Stripe flow failed, falling back to submit', e);
+                        form.submit();
+                    }
+                }
+            </script>
+        </div>
+    </div>
+</div>
+{{ form_end(form) }}
+{% endblock %}

@@ -1,0 +1,75 @@
+<div class="ai-widget" data-ai-chat-widget>
+    <section
+        id="ai-widget-panel"
+        class="ai-widget-panel"
+        data-ai-chat-panel
+        role="dialog"
+        aria-label="AI Art Assistant"
+        aria-hidden="true"
+        hidden
+    >
+        <header class="ai-widget-header">
+            <div>
+                <span class="ai-widget-eyebrow">Abstract Art Gallery</span>
+                <h2><span aria-hidden="true">✦</span> AI Art Assistant</h2>
+            </div>
+            <button
+                class="ai-widget-close"
+                type="button"
+                data-ai-chat-close
+                aria-label="Fermer l’assistant artistique"
+            >×</button>
+        </header>
+
+        <div class="ai-widget-intro">
+            <span class="ai-widget-mark" aria-hidden="true">✦</span>
+            <p>Bonjour ! Je suis l’assistant artistique{% if currentArtwork is defined and currentArtwork %} pour {{ currentArtwork.title }}{% else %} d’Abstract Art Gallery{% endif %}.</p>
+            <span>{% if currentArtwork is defined and currentArtwork %}Je peux répondre à vos questions sur cette œuvre.{% else %}Posez-moi une question sur l’art, les artistes ou les œuvres.{% endif %}</span>
+        </div>
+
+        <div class="ai-widget-conversation" data-ai-chat-conversation role="log" aria-live="polite" aria-relevant="additions text">
+            <div class="ai-widget-message ai-widget-message--assistant">
+                <span class="ai-widget-speaker">AI Art Assistant</span>
+                <p>Comment puis-je vous aider à découvrir la collection ?</p>
+            </div>
+        </div>
+
+        <div class="ai-widget-status" data-ai-chat-status role="status" aria-live="polite"></div>
+        <div class="ai-widget-error" data-ai-chat-error role="alert" hidden></div>
+
+        <form
+            class="ai-widget-form"
+            data-ai-chat-form
+            data-endpoint="{{ path('app_ai_assistant') }}"
+            {% if currentArtwork is defined and currentArtwork %}data-artwork-id="{{ currentArtwork.id }}"{% endif %}
+        >
+            <label class="sr-only" for="ai-widget-message">Votre question sur l’art, les artistes ou les œuvres</label>
+            <textarea
+                id="ai-widget-message"
+                class="ai-widget-input"
+                data-ai-chat-input
+                rows="1"
+                maxlength="2000"
+                placeholder="Votre question..."
+                aria-label="Votre question sur l’art, les artistes ou les œuvres"
+                required
+            ></textarea>
+            <button class="ai-widget-send" data-ai-chat-send type="submit" aria-label="Envoyer le message">
+                <span>Envoyer</span>
+                <span aria-hidden="true">↗</span>
+            </button>
+        </form>
+    </section>
+
+    <button
+        class="ai-widget-toggle"
+        data-ai-chat-open
+        type="button"
+        aria-label="Ouvrir l’assistant artistique"
+        aria-expanded="false"
+        aria-controls="ai-widget-panel"
+    >
+        <span class="ai-widget-toggle-icon" aria-hidden="true">✦</span>
+        <span class="ai-widget-toggle-label">AI Assistant</span>
+    </button>
+</div>

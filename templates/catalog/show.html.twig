@@ -1,0 +1,579 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ artwork.title }} - Abstract Art Gallery{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('styles/artwork-gallery.css') }}">
+    <link rel="stylesheet" href="{{ asset('styles/favorites.css') }}">
+    <link rel="stylesheet" href="{{ asset('styles/color-analysis.css') }}">
+    <style>
+        .breadcrumb {
+            max-width: 1280px;
+            margin: 0 auto 28px;
+            padding: 28px 0 0;
+            font-size: 0.78rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--aag-text-muted);
+        }
+
+        .breadcrumb a {
+            color: var(--aag-accent);
+            text-decoration: none;
+        }
+
+        .artwork-detail-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1.05fr) minmax(380px, 0.95fr);
+            gap: 0;
+            max-width: 1280px;
+            margin: 0 auto 74px;
+            color: var(--aag-text);
+        }
+
+        @media (max-width: 850px) {
+            .artwork-detail-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .artwork-detail-layout > :first-child {
+            min-width: 0;
+        }
+
+        .main-image-box {
+            min-height: 670px;
+            border-radius: 0;
+            overflow: hidden;
+            background: #111;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 72px;
+            color: var(--aag-text);
+        }
+
+        .artwork-header-info {
+            padding: 16px 0 28px;
+            margin-bottom: 28px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .category-tag {
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            font-weight: 700;
+            color: var(--aag-accent);
+            margin-bottom: 8px;
+        }
+
+        .artwork-title {
+            font-size: clamp(3rem, 5vw, 5.4rem);
+            font-weight: 600;
+            line-height: 0.94;
+            letter-spacing: -0.05em;
+            color: var(--aag-text);
+            margin: 0 0 10px 0;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.62rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            border: 1px solid transparent;
+        }
+
+        .status-AVAILABLE {
+            background: rgba(169,216,182,0.08);
+            border-color: rgba(169,216,182,0.2);
+            color: var(--aag-success);
+        }
+
+        .status-AUCTION {
+            background: rgba(209,169,93,0.08);
+            border-color: rgba(209,169,93,0.25);
+            color: var(--aag-accent-soft);
+        }
+
+        .status-RESERVED {
+            background: rgba(255,255,255,0.03);
+            border-color: rgba(255,255,255,0.08);
+            color: var(--aag-text-soft);
+        }
+
+        .status-SOLD {
+            background: rgba(239,68,68,0.08);
+            border-color: rgba(239,68,68,0.2);
+            color: #f7b4b4;
+        }
+
+        .price-box {
+            background: transparent;
+            border-radius: 0;
+            padding: 0;
+            margin-bottom: 42px;
+            border: 0;
+        }
+
+        .price-label {
+            font-size: 0.68rem;
+            color: var(--aag-text-muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            margin-bottom: 6px;
+        }
+
+        .price-amount {
+            font-size: clamp(2rem, 3vw, 3.2rem);
+            font-weight: 500;
+            color: var(--aag-text);
+            margin-bottom: 14px;
+        }
+
+        .action-buttons {
+            display: grid;
+            gap: 12px;
+        }
+
+        .btn-action-primary {
+            padding: 18px 20px;
+            background: #f1f1ef;
+            color: #130f0b;
+            text-align: center;
+            border-radius: 0;
+            text-decoration: none;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            font-size: 0.72rem;
+            transition: transform 0.18s ease;
+        }
+
+        .btn-action-primary:hover,
+        .btn-action-primary:focus-visible {
+            transform: translateY(-1px);
+        }
+
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .spec-item {
+            background: transparent;
+            padding: 28px 30px;
+            border-radius: 0;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .spec-title {
+            font-size: 0.66rem;
+            color: var(--aag-text-muted);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+        }
+
+        .spec-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--aag-text-soft);
+        }
+
+        .description-box {
+            margin-bottom: 24px;
+            line-height: 1.8;
+            color: var(--aag-text-soft);
+        }
+
+        .artwork-detail-layout > :last-child {
+            padding: 16px 64px 30px;
+            background: #080808;
+        }
+
+        .artwork-benefits {
+            display: grid;
+            gap: 18px;
+            margin-top: 40px;
+            padding-top: 28px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            color: var(--aag-text-muted);
+            font-size: 0.9rem;
+        }
+
+        .artwork-benefit::before {
+            content: '◈';
+            color: var(--aag-accent);
+            margin-right: 12px;
+        }
+
+        .artwork-sections {
+            max-width: 1020px;
+            margin: 0 auto 90px;
+        }
+
+        .artwork-tabs {
+            display: flex;
+            gap: 46px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .artwork-tab {
+            position: relative;
+            padding: 0 0 20px;
+            border: 0;
+            background: transparent;
+            color: var(--aag-text-muted);
+            cursor: pointer;
+            font: inherit;
+            font-size: 0.82rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+        }
+
+        .artwork-tab.is-active {
+            color: var(--aag-text);
+        }
+
+        .artwork-tab.is-active::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            bottom: -1px;
+            left: 0;
+            height: 1px;
+            background: var(--aag-accent);
+        }
+
+        .artwork-tab-panel {
+            padding-top: 48px;
+        }
+
+        .artwork-tab-panel[hidden] {
+            display: none;
+        }
+
+        .artwork-curatorial {
+            max-width: 820px;
+            color: var(--aag-text-muted);
+            font-size: 1.08rem;
+            line-height: 1.95;
+        }
+
+        .artwork-curatorial p:first-child {
+            margin-bottom: 28px;
+            color: var(--aag-text-soft);
+            font-family: var(--aag-font-serif);
+            font-size: 1.45rem;
+            font-style: italic;
+        }
+
+        .artist-card {
+            border-top: 1px solid var(--aag-border);
+            padding-top: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        @media (max-width: 900px) {
+            .artwork-detail-layout > :last-child {
+                padding: 32px 28px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .breadcrumb {
+                padding-top: 20px;
+            }
+
+            .main-image-box {
+                min-height: 440px;
+            }
+
+            .artwork-tabs {
+                gap: 24px;
+            }
+
+            .artwork-tab {
+                font-size: 0.68rem;
+            }
+        }
+
+        .artist-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: rgba(209,169,93,0.12);
+            color: var(--aag-accent-soft);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.2rem;
+        }
+
+        .artist-info-inline {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .artist-name {
+            font-weight: 700;
+            color: var(--aag-text);
+            font-size: 1rem;
+        }
+
+        .artist-country {
+            font-size: 0.8rem;
+            color: var(--aag-text-muted);
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="breadcrumb">
+    <a href="{{ path('app_home') }}">Accueil</a> &rarr; 
+    <a href="{{ path('app_catalog_index') }}">Catalogue</a> &rarr; 
+    <span>{{ artwork.title }}</span>
+</div>
+
+<div class="artwork-detail-layout">
+    <div>
+        <div class="main-image-box anim-reveal" data-artwork-gallery>
+            {% set primaryImage = null %}
+            {% set primaryImageIndex = 0 %}
+            {% for img in artwork.images %}
+                {% if img.isPrimary or primaryImage is null %}
+                    {% set primaryImage = img %}
+                    {% set primaryImageIndex = loop.index0 %}
+                {% endif %}
+            {% endfor %}
+
+            {% if primaryImage %}
+                {% set imagePath = primaryImage.filePath %}
+                {% set imageSrc = imagePath starts with 'http' ? imagePath : (imagePath starts with '/' ? asset(imagePath|trim('/')) : (imagePath starts with 'uploads/' ? asset(imagePath) : asset('uploads/artworks/' ~ imagePath))) %}
+                <div class="gallery-stage" data-gallery-stage>
+                    <img
+                        class="gallery-image"
+                        src="{{ imageSrc }}"
+                        alt="{{ primaryImage.altText|default(artwork.title) }}"
+                        width="1200"
+                        height="1500"
+                        data-gallery-main
+                        data-gallery-index="{{ primaryImageIndex }}"
+                        tabindex="0"
+                        role="button"
+                        aria-haspopup="dialog"
+                        aria-label="Agrandir l’image : {{ primaryImage.altText|default(artwork.title) }}"
+                        fetchpriority="high"
+                    >
+                    <img class="gallery-image gallery-image-incoming" alt="" width="1200" height="1500" aria-hidden="true" data-gallery-incoming>
+                </div>
+            {% elseif artwork.photo %}
+                <div class="gallery-stage">
+                    <img class="gallery-image" src="{{ asset('uploads/artworks/' ~ artwork.photo) }}" alt="{{ artwork.title }}" width="1200" height="1500">
+                </div>
+            {% else %}
+                <span>🖼️</span>
+            {% endif %}
+
+            {% if artwork.images|length > 1 %}
+                <div class="gallery-controls">
+                    <button class="gallery-control" type="button" data-gallery-previous aria-label="Image précédente">‹</button>
+                    <button class="gallery-control" type="button" data-gallery-next aria-label="Image suivante">›</button>
+                </div>
+                <div class="gallery-autoplay-progress" aria-hidden="true"><span data-gallery-progress-fill></span></div>
+                <div class="gallery-pagination" aria-label="Choisir une image">
+                    {% for image in artwork.images %}
+                        <button
+                            class="gallery-dot"
+                            type="button"
+                            data-gallery-page="{{ loop.index0 }}"
+                            aria-label="Afficher l’image {{ loop.index }} sur {{ artwork.images|length }}"
+                            aria-pressed="{{ image == primaryImage ? 'true' : 'false' }}"
+                        ></button>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% if artwork.images|length > 0 %}
+                <dialog class="gallery-lightbox" data-gallery-lightbox aria-label="Galerie de {{ artwork.title }}">
+                    <div class="gallery-lightbox-content">
+                        <button class="gallery-control gallery-lightbox-close" type="button" data-gallery-close aria-label="Fermer la galerie">×</button>
+                        <button class="gallery-control" type="button" data-lightbox-previous aria-label="Image précédente">‹</button>
+                        <img class="gallery-lightbox-image" data-gallery-lightbox-image width="1200" height="1500" alt="">
+                        <button class="gallery-control" type="button" data-lightbox-next aria-label="Image suivante">›</button>
+                    </div>
+                </dialog>
+            {% endif %}
+        </div>
+
+        {% if artwork.images|length > 0 %}
+            <div class="gallery-thumbnails" aria-label="Miniatures de la galerie">
+                {% for image in artwork.images %}
+                    {% set galleryPath = image.filePath %}
+                    {% set gallerySrc = galleryPath starts with 'http' ? galleryPath : (galleryPath starts with '/' ? asset(galleryPath|trim('/')) : (galleryPath starts with 'uploads/' ? asset(galleryPath) : asset('uploads/artworks/' ~ galleryPath))) %}
+                    <img
+                        src="{{ gallerySrc }}"
+                        alt="{{ image.altText|default(artwork.title) }}"
+                        class="gallery-thumbnail"
+                        width="80"
+                        height="80"
+                        loading="lazy"
+                        decoding="async"
+                        data-gallery-thumb
+                        data-gallery-index="{{ loop.index0 }}"
+                        role="button"
+                        tabindex="0"
+                        aria-pressed="{{ image == primaryImage ? 'true' : 'false' }}"
+                    >
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    <div>
+        <div class="artwork-header-info">
+            {% if artwork.category %}
+                <div class="category-tag">{{ artwork.category.name }}</div>
+            {% endif %}
+            <h1 class="artwork-title anim-enter">{{ artwork.title }}</h1>
+            <span class="status-pill status-{{ artwork.status }}">
+                {% if artwork.status == 'AVAILABLE' %}Disponible à la vente
+                {% elseif artwork.status == 'AUCTION' %}En vente aux enchères
+                {% elseif artwork.status == 'RESERVED' %}Réservé
+                {% elseif artwork.status == 'SOLD' %}Vendu
+                {% else %}{{ artwork.status }}{% endif %}
+            </span>
+        </div>
+
+        <div class="price-box">
+            <div class="price-label">Prix de l'œuvre</div>
+            <div class="price-amount">
+                {% if artwork.price %}
+                    {{ artwork.price|number_format(2, ',', ' ') }} {{ artwork.currency }}
+                {% else %}
+                    Sur demande
+                {% endif %}
+            </div>
+            
+            <div class="action-buttons">
+                {% if artwork.status == 'AVAILABLE' %}
+                    <a href="{{ path('app_cart_add', {id: artwork.id}) }}" class="btn-action-primary">Acquérir cette œuvre</a>
+                {% elseif artwork.status == 'AUCTION' %}
+                    <a href="{{ path('app_account') }}" class="btn-action-primary" style="background: #b45309;">Participer à l'enchère</a>
+                {% elseif artwork.status == 'PENDING_PAYMENT' and pendingOrder is defined and pendingOrder is not null %}
+                    {# Show a Stripe payment button for the pending order belonging to the current user #}
+                    <a href="{{ path('payment_create_checkout', {orderId: pendingOrder.id}) }}" class="btn-action-primary" style="background:#c89b45;">Payer la commande</a>
+                {% else %}
+                    <button class="btn-action-primary" style="background: #94a3b8; cursor: not-allowed;" disabled>Œuvre indisponible</button>
+                {% endif %}
+                {% include 'catalog/_favorite_button.html.twig' with {artwork: artwork, favoriteArtworkIds: favoriteArtworkIds|default([]), buttonClass: 'favorite-button--detail'} %}
+            </div>
+        </div>
+
+        <div class="artwork-benefits" aria-label="Garanties">
+            <div class="artwork-benefit">Certificat d’authenticité inclus</div>
+            <div class="artwork-benefit">Livraison sécurisée avec assurance</div>
+            <div class="artwork-benefit">Retours sous 14 jours</div>
+        </div>
+
+        <div class="artist-card">
+            <div class="artist-info-inline">
+                <div class="artist-avatar">
+                    {{ artwork.artist.name|slice(0, 1) }}
+                </div>
+                <div>
+                    <div class="artist-name">{{ artwork.artist.name }}</div>
+                    <div class="artist-country">{{ artwork.artist.country|default('Artiste résident') }}</div>
+                </div>
+            </div>
+            <a href="{{ path('app_artist_show', {id: artwork.artist.id}) }}" class="nav-btn nav-btn-outline">Voir l'artiste &rarr;</a>
+        </div>
+    </div>
+</div>
+
+<section class="artwork-sections">
+    <div class="artwork-tabs" role="tablist" aria-label="Informations sur l’œuvre">
+        <button type="button" class="artwork-tab is-active" role="tab" aria-selected="true" aria-controls="artwork-characteristics">Caractéristiques</button>
+        <button type="button" class="artwork-tab" role="tab" aria-selected="false" aria-controls="artwork-curatorial">Note curatoriale</button>
+    </div>
+
+    <div id="artwork-characteristics" class="artwork-tab-panel" role="tabpanel">
+        <div class="specs-grid">
+            <div class="spec-item">
+                <div class="spec-title">Technique</div>
+                <div class="spec-value">{{ artwork.technique|default('Non spécifiée') }}</div>
+            </div>
+            <div class="spec-item">
+                <div class="spec-title">Dimensions</div>
+                <div class="spec-value">{{ artwork.dimensions|default('Non spécifiées') }}</div>
+            </div>
+            <div class="spec-item">
+                <div class="spec-title">Année de création</div>
+                <div class="spec-value">{{ artwork.yearCreated ? artwork.yearCreated|date('Y') : 'Non renseignée' }}</div>
+            </div>
+            <div class="spec-item">
+                <div class="spec-title">Authenticité</div>
+                <div class="spec-value">Certificat inclus</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="artwork-curatorial" class="artwork-tab-panel artwork-curatorial" role="tabpanel" hidden>
+        {% if artwork.description %}
+            <p>« Une œuvre pensée comme une rencontre entre la matière et la lumière. »</p>
+            <div>{{ artwork.description|nl2br }}</div>
+        {% else %}
+            <p>« Une œuvre singulière, sélectionnée pour sa présence et sa profondeur. »</p>
+        {% endif %}
+    </div>
+</section>
+
+{% if colorAnalyses is not empty %}
+    <section class="artwork-color-palette" aria-labelledby="artwork-color-palette-title">
+        <span class="aag-section-label">Color Palette</span>
+        <h2 id="artwork-color-palette-title">Palette de l’œuvre</h2>
+        <div class="artwork-color-palette-list">
+            {% for analysis in colorAnalyses %}
+                <div class="artwork-color-palette-row">
+                    <span class="artwork-color-palette-swatch" style="--palette-color: {{ analysis.hexCode }}" aria-hidden="true"></span>
+                    <span class="artwork-color-palette-name">{{ analysis.color.name }}</span>
+                    <span class="artwork-color-palette-bar" aria-hidden="true">
+                        <span style="--palette-width: {{ analysis.percentage }}%; --palette-color: {{ analysis.hexCode }}"></span>
+                    </span>
+                    <span class="artwork-color-palette-percentage">{{ analysis.percentage|number_format(0, ',', ' ') }}%</span>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+{% endif %}
+
+<script>
+    document.querySelectorAll('.artwork-tab').forEach((tab) => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.artwork-tab').forEach((item) => {
+                item.classList.toggle('is-active', item === tab);
+                item.setAttribute('aria-selected', item === tab ? 'true' : 'false');
+            });
+            document.querySelectorAll('.artwork-tab-panel').forEach((panel) => {
+                panel.hidden = panel.id !== tab.getAttribute('aria-controls');
+            });
+        });
+    });
+</script>
+{% endblock %}

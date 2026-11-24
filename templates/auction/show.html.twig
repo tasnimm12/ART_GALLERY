@@ -1,0 +1,934 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ auction.artwork.title }} — Vente aux Enchères - Abstract Art Gallery{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('styles/auction-harmonized.css') }}">
+    <style>
+        .auction-layout {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 36px;
+            margin-top: 18px;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .auction-layout { grid-template-columns: 1fr; }
+        }
+
+        .artwork-image-container {
+            position: sticky;
+            top: 90px;
+            overflow: hidden;
+            border-radius: 30px;
+            border: 1px solid rgba(209,169,93,0.22);
+            background: linear-gradient(135deg, rgba(20,18,16,0.98), rgba(14,14,14,0.9));
+            box-shadow: 0 22px 40px rgba(0,0,0,0.18);
+        }
+
+        .artwork-image-container img {
+            display: block;
+            width: 100%;
+            max-height: 640px;
+            object-fit: contain;
+        }
+
+        .artwork-image-placeholder {
+            width: 100%;
+            height: 560px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 96px;
+            background: linear-gradient(135deg, rgba(209,169,93,0.35), rgba(120,95,48,0.18));
+            color: var(--aag-text);
+        }
+
+        .auction-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        .auction-status-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            background: linear-gradient(135deg, rgba(24,20,16,0.98), rgba(17,17,17,0.9));
+            border: 1px solid rgba(209,169,93,0.24);
+            border-radius: 22px;
+            padding: 18px 22px;
+            box-shadow: 0 18px 34px rgba(0,0,0,0.15);
+            color: var(--aag-text);
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.64rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            border: 1px solid transparent;
+        }
+
+        .status-ACTIVE {
+            background: rgba(239,68,68,0.10);
+            border-color: rgba(239,68,68,0.30);
+            color: #f7b4b4;
+        }
+
+        .status-SCHEDULED {
+            background: rgba(209,169,93,0.12);
+            border-color: rgba(209,169,93,0.32);
+            color: var(--aag-accent-soft);
+        }
+
+        .status-ENDED, .status-CANCELLED {
+            background: rgba(255,255,255,0.03);
+            border-color: rgba(255,255,255,0.08);
+            color: var(--aag-text-soft);
+        }
+
+        .live-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--aag-live);
+            display: inline-block;
+            box-shadow: 0 0 12px rgba(229,57,53,0.9);
+            animation: blink 1.2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .countdown-display {
+            font-size: clamp(1.4rem, 2vw, 2rem);
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.06em;
+            color: var(--aag-text);
+        }
+
+        .countdown-display.urgent { color: #f7b4b4; }
+
+        .info-card,
+        .bids-history-card,
+        .artwork-meta {
+            background: linear-gradient(180deg, rgba(18,16,13,0.88), rgba(17,17,17,0.8));
+            border: 1px solid rgba(209,169,93,0.18);
+            border-radius: 24px;
+            box-shadow: 0 18px 34px rgba(0,0,0,0.10);
+        }
+
+        .info-card {
+            padding: 24px 22px;
+        }
+
+        .info-card h2 {
+            margin: 0 0 8px;
+            font-size: clamp(2.1rem, 3vw, 3rem);
+            line-height: 0.95;
+            letter-spacing: -0.05em;
+            color: var(--aag-text);
+        }
+
+        .info-card .artist-name {
+            color: var(--aag-text-soft);
+            font-size: 0.96rem;
+            margin-bottom: 16px;
+        }
+
+        .info-card .artist-name a {
+            color: var(--aag-accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .prices-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 18px;
+            padding-top: 18px;
+            border-top: 1px solid var(--aag-border);
+        }
+
+        .price-block {
+            flex: 1;
+            display: grid;
+            gap: 6px;
+        }
+
+        .price-block .label {
+            color: var(--aag-text-muted);
+            font-size: 0.64rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .price-block .value {
+            font-size: clamp(1.7rem, 2vw, 2.4rem);
+            font-weight: 700;
+            color: var(--aag-text);
+        }
+
+        .price-block .value.start {
+            color: var(--aag-text-soft);
+            font-size: 1.2rem;
+        }
+
+        .increment-hint {
+            margin-top: 18px;
+            color: var(--aag-text-soft);
+            font-size: 0.9rem;
+            line-height: 1.7;
+        }
+
+        .bid-form-card {
+            background: linear-gradient(180deg, rgba(18,16,13,0.9), rgba(17,17,17,0.8));
+            border: 1px solid rgba(209,169,93,0.22);
+            border-radius: 24px;
+            padding: 22px 20px;
+            box-shadow: 0 20px 38px rgba(0,0,0,0.10);
+        }
+
+        .bid-form-card.closed {
+            background: rgba(255,255,255,0.02);
+            border-color: var(--aag-border);
+        }
+
+        .bid-form-card h3 {
+            margin: 0 0 14px;
+            font-size: 1.15rem;
+            letter-spacing: -0.02em;
+            color: var(--aag-text);
+        }
+
+        .bid-input-row {
+            display: flex;
+            gap: 10px;
+            align-items: stretch;
+            margin-bottom: 12px;
+        }
+
+        .bid-input {
+            flex: 1;
+            padding: 14px 16px;
+            font-size: 1.4rem;
+            font-weight: 700;
+            border-radius: 12px;
+            border: 1px solid rgba(209,169,93,0.35);
+            background: rgba(255,255,255,0.02);
+            color: var(--aag-text);
+            outline: none;
+        }
+
+        .bid-input:focus {
+            border-color: rgba(209,169,93,0.8);
+            box-shadow: 0 0 0 3px rgba(209,169,93,0.12);
+        }
+
+        .btn-bid {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 18px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--aag-accent), var(--aag-accent-warm));
+            color: #1b1207;
+            font-weight: 800;
+            font-size: 0.8rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: transform 0.18s ease;
+        }
+
+        .btn-bid:hover { transform: translateY(-1px); }
+
+        .quick-bids {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .quick-bid-btn {
+            padding: 7px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(209,169,93,0.3);
+            background: rgba(209,169,93,0.04);
+            color: var(--aag-accent-soft);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        .bids-history-card {
+            overflow: hidden;
+        }
+
+        .bids-history-header {
+            padding: 16px 20px;
+            background: rgba(255,255,255,0.02);
+            border-bottom: 1px solid var(--aag-border);
+            color: var(--aag-text-soft);
+            font-size: 0.76rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .bid-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            color: var(--aag-text-soft);
+        }
+
+        .bid-row:last-child { border-bottom: none; }
+        .bid-row.top-bid { background: rgba(209,169,93,0.04); }
+
+        .bid-amount {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--aag-text);
+        }
+
+        .bid-amount.top { color: var(--aag-accent-soft); }
+
+        .bid-user {
+            color: var(--aag-text-muted);
+            font-size: 0.88rem;
+        }
+
+        .bid-time {
+            color: var(--aag-text-muted);
+            font-size: 0.72rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .flash-msg {
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .flash-success {
+            background: rgba(169,216,182,0.08);
+            border: 1px solid rgba(169,216,182,0.22);
+            color: var(--aag-success);
+        }
+
+        .flash-error {
+            background: rgba(239,68,68,0.08);
+            border: 1px solid rgba(239,68,68,0.22);
+            color: #f4b5b5;
+        }
+
+        .flash-info {
+            background: rgba(209,169,93,0.08);
+            border: 1px solid rgba(209,169,93,0.22);
+            color: var(--aag-accent-soft);
+        }
+
+        .artwork-meta {
+            margin-top: 18px;
+            padding: 18px 20px;
+            color: var(--aag-text-soft);
+            font-size: 0.9rem;
+            line-height: 1.8;
+        }
+
+        .artwork-meta strong {
+            color: var(--aag-text);
+        }
+
+        .artwork-meta .meta-description {
+            margin: 20px 0 0;
+            padding-top: 18px;
+            border-top: 1px solid rgba(255,255,255,.10);
+            color: var(--aag-text-soft);
+            font-size: .92rem;
+            line-height: 1.75;
+        }
+
+        .artwork-meta-title {
+            margin: 0 0 18px;
+            color: var(--aag-text);
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: .04em;
+        }
+
+        .artwork-details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin: 0;
+        }
+
+        .artwork-detail-item {
+            min-width: 0;
+            padding: 13px 14px;
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 12px;
+            background: rgba(255,255,255,.025);
+        }
+
+        .artwork-detail-item dt {
+            margin-bottom: 5px;
+            color: var(--aag-text-muted);
+            font-size: .68rem;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+        .artwork-detail-item dd {
+            margin: 0;
+            color: var(--aag-text);
+            font-size: .9rem;
+            font-weight: 600;
+            overflow-wrap: anywhere;
+        }
+
+        .artwork-palette {
+            margin-top: 18px;
+        }
+
+        .artwork-palette h4 {
+            margin: 0 0 10px;
+            color: var(--aag-text-muted);
+            font-size: .68rem;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+        .artwork-palette-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .artwork-palette-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 36px;
+            padding: 6px 10px;
+            border: 1px solid rgba(255,255,255,.10);
+            border-radius: 999px;
+            background: rgba(255,255,255,.035);
+            color: var(--aag-text-soft);
+            font-size: .78rem;
+        }
+
+        .artwork-palette-swatch {
+            width: 16px;
+            height: 16px;
+            flex: 0 0 16px;
+            border: 1px solid rgba(255,255,255,.35);
+            border-radius: 50%;
+            background-color: var(--swatch-color);
+            box-shadow: 0 0 0 2px rgba(0,0,0,.28);
+        }
+
+        .artwork-palette-percentage {
+            color: var(--aag-accent-soft);
+            font-variant-numeric: tabular-nums;
+        }
+
+        @media (max-width: 520px) {
+            .artwork-details-grid { grid-template-columns: 1fr; }
+            .artwork-meta { padding: 18px 16px; }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="auction-harmonized-page">
+<div class="auction-front-shell">
+<div style="margin-bottom: 16px; font-size: 14px;">
+    <a href="{{ path('app_auction_index') }}" style="color:#c89b45; text-decoration:none;">&larr; Toutes les enchères</a>
+</div>
+
+{% for label, messages in app.flashes %}
+    {% for message in messages %}
+        <div class="flash-msg flash-{{ label }}">{{ message }}</div>
+    {% endfor %}
+{% endfor %}
+
+<div class="auction-layout">
+
+    {# ── LEFT: Artwork visual ── #}
+    <div>
+        <div class="artwork-image-container">
+            {% set img = auction.artwork.images|first %}
+            {% if img %}
+                {% set imagePath = img.filePath %}
+                {% set imageSrc = imagePath starts with 'http' ? imagePath : (imagePath starts with '/' ? asset(imagePath|trim('/')) : (imagePath starts with 'uploads/' ? asset(imagePath) : asset('uploads/artworks/' ~ imagePath))) %}
+                <img src="{{ imageSrc }}" alt="{{ auction.artwork.title }}">
+            {% elseif auction.artwork.photo %}
+                <img src="{{ asset('uploads/artworks/' ~ auction.artwork.photo) }}" alt="{{ auction.artwork.title }}">
+            {% else %}
+                <div class="artwork-image-placeholder">🎨</div>
+            {% endif %}
+        </div>
+        <section class="artwork-meta" aria-labelledby="artwork-meta-title">
+            <h3 class="artwork-meta-title" id="artwork-meta-title">Détails de l’œuvre</h3>
+            <dl class="artwork-details-grid">
+                <div class="artwork-detail-item">
+                    <dt>Technique</dt>
+                    <dd>{{ auction.artwork.technique|default('Non précisée') }}</dd>
+                </div>
+                <div class="artwork-detail-item">
+                    <dt>Dimensions</dt>
+                    <dd>{{ auction.artwork.dimensions|default('Non précisées') }}</dd>
+                </div>
+                <div class="artwork-detail-item">
+                    <dt>Année</dt>
+                    <dd>{{ auction.artwork.yearCreated ? auction.artwork.yearCreated|date('Y') : '—' }}</dd>
+                </div>
+                <div class="artwork-detail-item">
+                    <dt>Catégorie</dt>
+                    <dd>{{ auction.artwork.category ? auction.artwork.category.name : '—' }}</dd>
+                </div>
+            </dl>
+            {% if auction.artwork.colorAnalyses is not empty %}
+                <div class="artwork-palette">
+                    <h4>Couleurs principales</h4>
+                    <div class="artwork-palette-list">
+                        {% for analysis in auction.artwork.colorAnalyses %}
+                            <span class="artwork-palette-item">
+                                <span class="artwork-palette-swatch" style="--swatch-color: {{ analysis.hexCode }}" aria-hidden="true"></span>
+                                <span>{{ analysis.color.name }}</span>
+                                <span class="artwork-palette-percentage">{{ analysis.percentage|number_format(0, ',', ' ') }}%</span>
+                            </span>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% elseif auction.artwork.colors is not empty %}
+                <div class="artwork-palette">
+                    <h4>Couleurs principales</h4>
+                    <div class="artwork-palette-list">
+                        {% for color in auction.artwork.colors %}
+                            <span class="artwork-palette-item">
+                                <span class="artwork-palette-swatch" style="--swatch-color: {{ color.hex }}" aria-hidden="true"></span>
+                                <span>{{ color.name }}</span>
+                            </span>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+            {% if auction.artwork.description %}
+                <p class="meta-description">
+                    {{ auction.artwork.description|nl2br }}
+                </p>
+            {% endif %}
+        </section>
+    </div>
+
+    {# ── RIGHT: Bid Panel ── #}
+    <div class="auction-panel">
+
+        {# Status bar with countdown #}
+        <div class="auction-status-bar">
+            {% if auction.isActive() %}
+                <div><span class="live-dot"></span><strong>EN DIRECT</strong></div>
+                <div class="countdown-display" id="main-countdown">
+                    …
+                </div>
+            {% elseif auction.isUpcoming() %}
+                <div>📅 <strong>PLANIFIÉE</strong></div>
+                <div style="font-size:14px; color:#94a3b8;">{{ auction.startDate|date('d/m/Y à H:i') }}</div>
+            {% else %}
+                <div>🏁 <strong>CLÔTURÉE</strong></div>
+                <div style="font-size:14px; color:#94a3b8;">
+                    {% if auction.closedAt %}{{ auction.closedAt|date('d/m/Y') }}{% else %}{{ auction.endDate|date('d/m/Y') }}{% endif %}
+                </div>
+            {% endif %}
+        </div>
+
+        {# Artwork info + prices #}
+        <div class="info-card">
+            <h2>{{ auction.artwork.title }}</h2>
+            <div class="artist-name">
+                Par <a href="{{ path('app_artist_show', {id: auction.artwork.artist.id}) }}" style="color:#c89b45; text-decoration:none; font-weight:600;">{{ auction.artwork.artist.name }}</a>
+            </div>
+
+            <div class="prices-row">
+                <div class="price-block">
+                    <div class="label">Prix de départ</div>
+                    <div class="value start">{{ auction.startingPrice|number_format(0, ',', ' ') }} €</div>
+                </div>
+                <div class="price-block" style="text-align:right;">
+                    <div class="label">Meilleure offre</div>
+                    <div class="value" id="current-price">
+                        {% if auction.currentPrice %}
+                            {{ auction.currentPrice|number_format(0, ',', ' ') }} €
+                        {% else %}
+                            <span style="color:#94a3b8; font-size:18px;">Aucune offre</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="increment-hint">
+                🔼 Incrément minimum : <strong>{{ auction.minIncrement|number_format(0, ',', ' ') }} €</strong>
+                &nbsp;·&nbsp;
+                Prochaine mise minimum : <strong id="min-bid-hint">{{ minBid|number_format(2, ',', ' ') }} €</strong>
+                {% if bids|length > 0 %}
+                    &nbsp;·&nbsp;
+                    <span>{{ bids|length }} offre(s)</span>
+                {% endif %}
+            </div>
+        </div>
+
+        {# Bid form #}
+        {% if auction.isActive() %}
+            {% if app.user %}
+                <div class="bid-form-card">
+                    <h3>🔒 Placer votre offre</h3>
+                    {{ form_start(form, {'attr': {'id': 'bid-form', 'autocomplete': 'off'}}) }}
+                        <div class="bid-input-row">
+                            {{ form_widget(form.amount, {'attr': {'id': 'bid-amount', 'class': 'bid-input'}}) }}
+                            <button type="submit" class="btn-bid">Enchérir</button>
+                        </div>
+                        {{ form_errors(form.amount) }}
+                    {{ form_end(form) }}
+                    <div class="quick-bids">
+                        <span style="font-size:13px; color:#64748b; line-height:2;">Mise rapide :</span>
+                        <button class="quick-bid-btn" data-add="{{ auction.minIncrement }}">+{{ auction.minIncrement|number_format(0) }} €</button>
+                        <button class="quick-bid-btn" data-add="{{ auction.minIncrement * 5 }}">+{{ (auction.minIncrement * 5)|number_format(0) }} €</button>
+                        <button class="quick-bid-btn" data-add="{{ auction.minIncrement * 10 }}">+{{ (auction.minIncrement * 10)|number_format(0) }} €</button>
+                    </div>
+                </div>
+            {% else %}
+                <div class="bid-form-card" style="background:#eff6ff; border-color:#93c5fd;">
+                    <h3 style="color:#8a6825;">🔐 Connexion requise</h3>
+                    <p style="font-size:14px; color:#334155; margin-bottom:14px;">Connectez-vous ou créez un compte client pour participer à cette vente aux enchères.</p>
+                    <a href="{{ path('app_login') }}" class="btn-bid" style="display:block; text-align:center; text-decoration:none; background:#c89b45;">Se connecter</a>
+                </div>
+            {% endif %}
+        {% elseif auction.isUpcoming() %}
+            <div class="bid-form-card closed">
+                <h3>📅 Enchères pas encore ouvertes</h3>
+                <p style="font-size:14px; color:#64748b;">Les enchères ouvriront le {{ auction.startDate|date('d/m/Y à H:i') }}.</p>
+            </div>
+        {% else %}
+            <div class="bid-form-card closed">
+                <h3>🏁 Vente Clôturée</h3>
+                {% if auction.winner %}
+                    <p style="font-size:14px; color:#64748b;">
+                        Gagnant : <strong>{{ auction.winner.firstName }} {{ auction.winner.lastName }}</strong><br>
+                        Prix final : <strong>{{ auction.currentPrice|number_format(0, ',', ' ') }} €</strong>
+                    </p>
+                {% else %}
+                    <p style="font-size:14px; color:#94a3b8;">Aucune offre enregistrée.</p>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {# Bid History #}
+        <div class="bids-history-card" id="bids-list-container">
+            <div class="bids-history-header" id="bids-counter">📋 Historique des offres ({{ bids|length }})</div>
+            <div id="bids-list">
+            {% if bids|length > 0 %}
+                {% for bid in bids %}
+                <div class="bid-row {% if loop.first %}top-bid{% endif %}">
+                    <div>
+                        <div class="bid-amount {% if loop.first %}top{% endif %}">
+                            {% if loop.first %}🏆 {% endif %}
+                            {{ bid.amount|number_format(0, ',', ' ') }} €
+                        </div>
+                        <div class="bid-user">
+                            {{ bid.user.firstName }} {{ bid.user.lastName|slice(0,1) }}.
+                            {% if bid.status == 'OUTBID' %}<span style="font-size:11px; color:#94a3b8;">(surenchéri)</span>{% endif %}
+                        </div>
+                    </div>
+                    <div class="bid-time">{{ bid.createdAt|date('d/m à H:i:s') }}</div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div style="padding: 24px; text-align:center; color:#94a3b8; font-size:14px;">
+                    Aucune offre pour le moment. Soyez le premier à enchérir !
+                </div>
+            {% endif %}
+            </div>{# /bids-list #}
+        </div>
+
+    </div>{# end panel #}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // ─── Configuration ─────────────────────────────────────────────────────────
+    const auctionId      = {{ auction.id }};
+    const stateUrl       = '/encheres/' + auctionId + '/state';
+    {% if auction.isActive() %}
+    const mercureUrl     = {{ mercure('/auction/' ~ auction.id)|json_encode|raw }};
+    {% else %}
+    const mercureUrl     = null;
+    {% endif %}
+
+    // ─── Countdown engine ──────────────────────────────────────────────────────
+    let endTimestamp = {{ auction.endDate.timestamp }} * 1000;
+    let countdownTimer = null;
+
+    const countdownEl = document.getElementById('main-countdown');
+
+    function formatCountdown(ms) {
+        const remaining = Math.max(0, Math.floor(ms / 1000));
+        if (remaining <= 0) return { text: 'Terminée', urgent: true };
+        const h = Math.floor(remaining / 3600);
+        const m = Math.floor((remaining % 3600) / 60);
+        const s = remaining % 60;
+        let txt = '';
+        if (h > 0) txt += h + 'h ';
+        txt += (m < 10 ? '0' : '') + m + 'min ';
+        txt += (s < 10 ? '0' : '') + s + 's';
+        return { text: txt, urgent: remaining < 300 };
+    }
+
+    function tickCountdown() {
+        if (!countdownEl) return;
+        const result = formatCountdown(endTimestamp - Date.now());
+        countdownEl.textContent = result.text;
+        if (result.urgent) countdownEl.classList.add('urgent');
+        if (result.text !== 'Terminée') {
+            countdownTimer = setTimeout(tickCountdown, 1000);
+        }
+    }
+
+    if (countdownEl) tickCountdown();
+
+    // ─── DOM update helpers ────────────────────────────────────────────────────
+    function updatePrice(data) {
+        const priceEl = document.getElementById('current-price');
+        if (!priceEl) return;
+        if (data.currentPrice) {
+            const formatted = parseFloat(data.currentPrice)
+                .toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            priceEl.innerHTML = '<span class="price-flash">' + formatted + ' €</span>';
+            // Flash animation
+            priceEl.classList.remove('price-updated');
+            void priceEl.offsetWidth;
+            priceEl.classList.add('price-updated');
+        }
+    }
+
+    function updateCountdown(data) {
+        if (!data.endDateTimestamp) return;
+        const newEnd = data.endDateTimestamp * 1000;
+        if (newEnd !== endTimestamp) {
+            endTimestamp = newEnd;
+            clearTimeout(countdownTimer);
+            tickCountdown();
+            if (data.antiSnipeTriggered) {
+                showToast('⏱ Anti-snipe : enchère prolongée de 2 minutes !', 'warning');
+            }
+        }
+        // Clôture immédiate
+        if (data.isClosed && countdownEl) {
+            clearTimeout(countdownTimer);
+            countdownEl.textContent = 'Terminée';
+            countdownEl.classList.add('urgent');
+        }
+    }
+
+    function updateBidHistory(data) {
+        const list = document.getElementById('bids-list');
+        if (!list || !data.bids) return;
+        list.innerHTML = data.bids.map(function (bid, i) {
+            return '<div class="bid-row' + (i === 0 ? ' top-bid' : '') + '">' +
+                '<div>' +
+                  '<div class="bid-amount' + (i === 0 ? ' top' : '') + '">' +
+                    (i === 0 ? '🏆 ' : '') + parseFloat(bid.amount).toLocaleString('fr-FR') + ' €' +
+                  '</div>' +
+                  '<div class="bid-user">' + bid.bidderName +
+                    (bid.status === 'OUTBID' ? ' <span style="font-size:11px;color:#94a3b8;">(surenchéri)</span>' : '') +
+                  '</div>' +
+                '</div>' +
+                '<div class="bid-time">' + bid.placedAt + '</div>' +
+                '</div>';
+        }).join('');
+
+        const counter = document.getElementById('bids-counter');
+        if (counter && data.totalBids !== undefined) {
+            counter.textContent = '📋 Historique des offres (' + data.totalBids + ')';
+        }
+    }
+
+    function updateMinBid(data) {
+        const minBidEl = document.getElementById('min-bid-hint');
+        if (minBidEl && data.minimumNextBid) {
+            minBidEl.textContent = parseFloat(data.minimumNextBid).toLocaleString('fr-FR', {minimumFractionDigits: 2}) + ' €';
+        }
+        // Mettre à jour le champ input bid
+        const amountInput = document.getElementById('bid-amount');
+        if (amountInput && data.minimumNextBid) {
+            amountInput.min = data.minimumNextBid;
+            amountInput.dataset.min = data.minimumNextBid;
+            if (parseFloat(amountInput.value) < parseFloat(data.minimumNextBid)) {
+                amountInput.value = '';
+                amountInput.placeholder = parseFloat(data.minimumNextBid).toFixed(2);
+            }
+        }
+    }
+
+    function applyStateUpdate(data) {
+        updatePrice(data);
+        updateCountdown(data);
+        updateBidHistory(data);
+        updateMinBid(data);
+    }
+
+    // ─── Toast notification ────────────────────────────────────────────────────
+    function showToast(message, type) {
+        type = type || 'info';
+        const toast = document.createElement('div');
+        toast.className = 'live-toast live-toast-' + type;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(function () { toast.classList.add('visible'); }, 50);
+        setTimeout(function () {
+            toast.classList.remove('visible');
+            setTimeout(function () { toast.remove(); }, 400);
+        }, 4000);
+    }
+
+    // ─── Mercure SSE ───────────────────────────────────────────────────────────
+    let sseActive = false;
+    let pollInterval = null;
+
+    function startPolling() {
+        if (pollInterval) return; // déjà actif
+        console.info('[Auction] Fallback polling actif (15s).');
+        pollInterval = setInterval(function () {
+            fetch(stateUrl)
+                .then(function (r) { return r.json(); })
+                .then(applyStateUpdate)
+                .catch(function () {});
+        }, 15000);
+    }
+
+    function stopPolling() {
+        if (pollInterval) {
+            clearInterval(pollInterval);
+            pollInterval = null;
+        }
+    }
+
+    if (mercureUrl) {
+        try {
+            const es = new EventSource(mercureUrl);
+
+            es.onopen = function () {
+                sseActive = true;
+                stopPolling(); // SSE opérationnel, polling inutile
+                console.info('[Auction] Mercure SSE connecté.');
+            };
+
+            es.onmessage = function (event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    applyStateUpdate(data);
+                    if (data.lastBid) {
+                        showToast('🔔 Nouvelle offre : ' + parseFloat(data.lastBid.amount).toLocaleString('fr-FR') + ' € par ' + data.lastBid.bidderName, 'info');
+                    }
+                } catch (e) {
+                    console.warn('[Auction] Message SSE invalide :', e);
+                }
+            };
+
+            es.onerror = function () {
+                if (sseActive) return; // Reconnexion automatique SSE native
+                // Hub non joignable en dev — basculer sur polling
+                console.warn('[Auction] Mercure SSE indisponible — bascule sur polling.');
+                es.close();
+                startPolling();
+            };
+
+            // Fallback de sécurité : si SSE n'ouvre pas en 5 secondes, activer polling
+            setTimeout(function () {
+                if (!sseActive) startPolling();
+            }, 5000);
+
+        } catch (e) {
+            console.warn('[Auction] EventSource non supporté :', e);
+            startPolling();
+        }
+    }
+    // Pas d'enchère active → pas de SSE, pas de polling
+
+    // ─── Quick-bid buttons ─────────────────────────────────────────────────────
+    const amountInput = document.getElementById('bid-amount');
+    document.querySelectorAll('.quick-bid-btn').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            if (!amountInput) return;
+            var add     = parseFloat(btn.dataset.add);
+            var min     = parseFloat(amountInput.dataset.min || '0');
+            var current = parseFloat(amountInput.value) || min;
+            amountInput.value = (Math.max(current, min) + add).toFixed(2);
+        });
+    });
+});
+</script>
+
+<style>
+/* ── Price flash animation ── */
+@keyframes priceFlash {
+    0%   { background: #fef3c7; transform: scale(1.06); }
+    60%  { background: #fef9c3; }
+    100% { background: transparent; transform: scale(1); }
+}
+.price-updated { animation: priceFlash 0.7s ease; border-radius: 6px; }
+
+/* ── Live toast notifications ── */
+.live-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    padding: 14px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    z-index: 9999;
+    max-width: 360px;
+}
+.live-toast.visible { opacity: 1; transform: translateY(0); }
+.live-toast-info    { background: #c89b45; }
+.live-toast-warning { background: #d97706; }
+.live-toast-success { background: #16a34a; }
+</style>
+</div>
+{% endblock %}

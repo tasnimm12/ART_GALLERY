@@ -1,0 +1,477 @@
+{# templates/admin/artist/new_easyadmin.html.twig #}
+{# This template replaces EasyAdmin's crud/new for the Artist CRUD only (configured in ArtistCrudController) #}
+{% extends '@!EasyAdmin/crud/new.html.twig' %}
+{% form_theme new_form with ea.crud.formThemes only %}
+
+{% block configured_stylesheets %}
+    {{ parent() }}
+    <style>
+        .form-container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: #111111;
+            padding: 35px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.50);
+        }
+
+        .form-header h1 {
+            font-size: 26px;
+            font-weight: 800;
+            color: #FFFFFF;
+            margin: 0 0 6px 0;
+            letter-spacing: -0.02em;
+        }
+
+        .form-header p {
+            font-size: 14px;
+            color: #A3A3A3;
+            margin: 0 0 18px 0;
+        }
+
+        .form-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.10);
+            margin: 18px 0 22px 0;
+            border: none;
+        }
+
+        .form-row {
+            margin-bottom: 20px;
+        }
+
+        .form-row label {
+            display: block;
+            font-size: 11.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #A3A3A3;
+            margin-bottom: 8px;
+        }
+
+        .form-row .field-widget {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            background: #0B0B0B;
+            color: #FFFFFF;
+            box-sizing: border-box;
+        }
+
+        .form-row .field-widget:focus {
+            border-color: #C9A227;
+            box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.18);
+        }
+
+        /* Invalid state */
+        .field-widget.is-invalid {
+            border-color: rgba(255, 255, 255, 0.40);
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.10);
+            background: #0E0E0E;
+        }
+
+        textarea.form-textarea {
+            min-height: 140px;
+            resize: vertical;
+            line-height: 1.4;
+        }
+
+        .image-preview {
+            margin-top: 10px;
+            max-width: 160px;
+            max-height: 160px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            background: #0B0B0B;
+            overflow: hidden;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.40);
+        }
+
+        .image-preview img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .form-errors {
+            margin-top: 6px;
+            color: #E0C766;
+            font-size: 12.5px;
+            font-weight: 600;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.10);
+            padding-top: 20px;
+        }
+
+        .btn-cancel {
+            background: #0B0B0B;
+            color: #FFFFFF;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: border-color 0.15s ease;
+        }
+
+        .btn-cancel:hover {
+            border-color: #C9A227;
+            color: #C9A227;
+        }
+
+        .btn-submit {
+            background: #C9A227;
+            color: #050505;
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.15s ease;
+        }
+
+        .btn-submit:hover {
+            background: #E0C766;
+        }
+
+        @media (max-width: 640px) {
+            .form-container {
+                padding: 20px;
+                margin: 18px;
+            }
+
+            .form-actions {
+                flex-direction: column-reverse;
+                align-items: stretch;
+            }
+
+            .btn-cancel, .btn-submit {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block main %}
+    <div class="form-container" role="main" aria-labelledby="artist-form-title">
+        <div class="form-header">
+            <h1 id="artist-form-title">🎨 Ajouter un Artiste</h1>
+            <p>Ajoutez un nouvel artiste au catalogue de la galerie.</p>
+            <div class="form-divider" aria-hidden="true"></div>
+        </div>
+
+        {{ form_start(new_form, {'attr': {'class': 'artist-form', 'autocomplete': 'off', 'novalidate': 'novalidate'}}) }}
+
+            <div class="form-row">
+                {{ form_label(new_form.name) }}
+                <div>
+                    {{ form_widget(new_form.name, {'attr': {'class': 'field-widget','data-field':'name'}}) }}
+                    <div class="form-errors">{{ form_errors(new_form.name) }}</div>
+                </div>
+            </div>
+
+            {% if new_form.country is defined %}
+                <div class="form-row">
+                    {{ form_label(new_form.country) }}
+                    <div>
+                        {{ form_widget(new_form.country, {'attr': {'class': 'field-widget','data-field':'country'}}) }}
+                        <div class="form-errors">{{ form_errors(new_form.country) }}</div>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if new_form.website is defined %}
+                <div class="form-row">
+                    {{ form_label(new_form.website) }}
+                    <div>
+                        {{ form_widget(new_form.website, {'attr': {'class': 'field-widget','data-field':'website', 'placeholder': 'https://'}}) }}
+                        <div class="form-errors">{{ form_errors(new_form.website) }}</div>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if new_form.biography is defined %}
+                <div class="form-row">
+                    {{ form_label(new_form.biography) }}
+                    <div>
+                        {{ form_widget(new_form.biography, {'attr': {'class': 'field-widget form-textarea', 'data-field':'biography', 'maxlength': 2000}}) }}
+                        <div class="form-errors">{{ form_errors(new_form.biography) }}</div>
+                        <div id="bioCounter" class="form-errors" style="color:#A3A3A3;font-size:12px;margin-top:6px;">0 / 2000</div>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if new_form.photo is defined %}
+                <div class="form-row">
+                    {{ form_label(new_form.photo) }}
+                    <div>
+                        {{ form_widget(new_form.photo, {'attr': {'class': 'field-widget','data-field':'photo', 'accept': '.jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp'}}) }}
+                        <div class="form-errors">{{ form_errors(new_form.photo) }}</div>
+
+                        <div class="image-preview" id="photoPreview" aria-hidden="true">
+                            <img id="photoPreviewImg" src="" alt="Aperçu de la photo de l'artiste">
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            {# Render any other fields (hidden ones) to keep form behavior #}
+            {% for child in new_form %}
+                {% if child.vars.name not in ['name', 'country', 'website', 'biography', 'photo'] %}
+                    <div style="display:none">{{ form_widget(child) }} {{ form_errors(child) }}</div>
+                {% endif %}
+            {% endfor %}
+
+            <div class="form-actions" role="group" aria-label="Actions du formulaire">
+                {% if ea.crud.getActionsForPage('new') is defined %}
+                    {# Keep existing EasyAdmin actions if needed (but we render our own buttons) #}
+                {% endif %}
+
+                <a href="javascript:history.back()" class="btn-cancel">Annuler</a>
+                <button type="submit" class="btn-submit">🎨 Ajouter l'Artiste</button>
+            </div>
+
+        {{ form_end(new_form) }}
+    </div>
+{% endblock %}
+
+{% block configured_javascripts %}
+    {{ parent() }}
+    <script>
+        (function () {
+            // Utility helpers
+            function setFieldError(fieldEl, message) {
+                if (!fieldEl) return;
+                fieldEl.classList.add('is-invalid');
+                var row = fieldEl.closest('.form-row');
+                if (!row) return;
+                var errors = row.querySelector('.form-errors');
+                if (errors) {
+                    errors.innerHTML = '<span class="error-icon"></span>' + message;
+                }
+            }
+
+            function clearFieldError(fieldEl) {
+                if (!fieldEl) return;
+                fieldEl.classList.remove('is-invalid');
+                var row = fieldEl.closest('.form-row');
+                if (!row) return;
+                var errors = row.querySelector('.form-errors');
+                if (errors) {
+                    errors.innerHTML = '';
+                }
+            }
+
+            function findByDataField(form, name) {
+                var field = form.querySelector('[data-field="' + name + '"]');
+                if (name === 'photo' && field && !field.matches('input[type="file"]')) {
+                    return field.querySelector('input[type="file"]');
+                }
+
+                return field;
+            }
+
+            function isValidName(v) {
+                if (!v) return false;
+                if (v.length < 2 || v.length > 100) return false;
+                try {
+                    return /^[\p{L}\s'\-]+$/u.test(v);
+                } catch (e) {
+                    // Fallback for older browsers: allow basic letters and common chars
+                    return /^[A-Za-zÀ-ÖØ-öø-ÿ\s'\-]+$/.test(v);
+                }
+            }
+
+            function isValidCountry(v) {
+                if (!v) return false;
+                if (v.length < 2 || v.length > 100) return false;
+                try {
+                    return /^[\p{L}\s\-]+$/u.test(v);
+                } catch (e) {
+                    return /^[A-Za-zÀ-ÖØ-öø-ÿ\s\-]+$/.test(v);
+                }
+            }
+
+            function isValidURL(v) {
+                try {
+                    var u = new URL(v);
+                    return (u.protocol === 'http:' || u.protocol === 'https:');
+                } catch (e) {
+                    return false;
+                }
+            }
+
+            function validateForm(e) {
+                var form = e.target;
+                var valid = true;
+
+                // Name
+                var nameEl = findByDataField(form, 'name');
+                var nameVal = nameEl ? nameEl.value.trim() : '';
+                clearFieldError(nameEl);
+                if (!nameVal) {
+                    setFieldError(nameEl, 'Le nom de l\'artiste est obligatoire.');
+                    valid = false;
+                } else if (nameVal.length < 2) {
+                    setFieldError(nameEl, 'Le nom doit contenir au moins 2 caractères.');
+                    valid = false;
+                } else if (nameVal.length > 100) {
+                    setFieldError(nameEl, 'Le nom ne peut pas dépasser 100 caractères.');
+                    valid = false;
+                } else if (!isValidName(nameVal)) {
+                    setFieldError(nameEl, 'Le nom contient des caractères invalides.');
+                    valid = false;
+                }
+
+                // Country
+                var countryEl = findByDataField(form, 'country');
+                if (countryEl) {
+                    var countryVal = countryEl.value.trim();
+                    clearFieldError(countryEl);
+                    if (!countryVal) {
+                        setFieldError(countryEl, 'Le pays est obligatoire.');
+                        valid = false;
+                    } else if (!isValidCountry(countryVal)) {
+                        setFieldError(countryEl, 'Veuillez saisir un pays valide.');
+                        valid = false;
+                    }
+                }
+
+                // Website
+                var websiteEl = findByDataField(form, 'website');
+                if (websiteEl) {
+                    var websiteVal = websiteEl.value.trim();
+                    clearFieldError(websiteEl);
+                    if (websiteVal !== '' && !isValidURL(websiteVal)) {
+                        setFieldError(websiteEl, 'Veuillez saisir une URL valide.');
+                        valid = false;
+                    }
+                }
+
+                // Biography length
+                var bioEl = findByDataField(form, 'biography');
+                if (bioEl) {
+                    var bioVal = bioEl.value || '';
+                    clearFieldError(bioEl);
+                    if (bioVal.length > 2000) {
+                        setFieldError(bioEl, 'La biographie ne peut pas dépasser 2000 caractères.');
+                        valid = false;
+                    }
+                }
+
+                // Photo: check mime and size
+                var photoEl = findByDataField(form, 'photo');
+                if (photoEl && photoEl.files && photoEl.files[0]) {
+                    var file = photoEl.files[0];
+                    var allowed = ['image/jpeg', 'image/png', 'image/webp'];
+                    clearFieldError(photoEl);
+                    if (allowed.indexOf(file.type) === -1) {
+                        setFieldError(photoEl, "Le format de l'image n'est pas autorisé.");
+                        valid = false;
+                    } else if (file.size > 5 * 1024 * 1024) {
+                        setFieldError(photoEl, "L'image ne doit pas dépasser 5 MB.");
+                        valid = false;
+                    }
+                }
+
+                if (!valid) {
+                    e.preventDefault();
+                    return false;
+                }
+
+                // On succès, allow normal submit
+                return true;
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                var form = document.querySelector('.artist-form');
+                if (!form) return;
+
+                // Remove native validation UI
+                form.setAttribute('novalidate', 'novalidate');
+
+                // Attach submit handler
+                form.addEventListener('submit', function (e) {
+                    if (!validateForm(e)) {
+                        // focus first invalid field
+                        var first = form.querySelector('.is-invalid');
+                        if (first) first.focus();
+                    }
+                });
+                // Live clearing of errors
+                ['name','country','website','biography','photo'].forEach(function (fieldName) {
+                    var el = findByDataField(form, fieldName);
+                    if (!el) return;
+                    var eventType = (fieldName === 'photo') ? 'change' : 'input';
+                    el.addEventListener(eventType, function () { clearFieldError(el); });
+                });
+
+                // Biography counter
+                var bioEl = findByDataField(form, 'biography');
+                var counter = document.getElementById('bioCounter');
+                if (bioEl && counter) {
+                    function updateCounter() {
+                        var len = bioEl.value ? bioEl.value.length : 0;
+                        counter.textContent = len + ' / 2000';
+                        if (len > 2000) counter.style.color = '#E0C766'; else counter.style.color = '#A3A3A3';
+                    }
+                    bioEl.addEventListener('input', updateCounter);
+                    updateCounter();
+                }
+
+                // Existing photo preview logic (unchanged)
+                var photoInput = findByDataField(form, 'photo');
+                var preview = document.getElementById('photoPreview');
+                var previewImg = document.getElementById('photoPreviewImg');
+                if (photoInput && preview && previewImg) {
+                    photoInput.addEventListener('change', function (e) {
+                        var file = photoInput.files && photoInput.files[0];
+                        if (!file) {
+                            preview.style.display = 'none';
+                            previewImg.src = '';
+                            preview.setAttribute('aria-hidden', 'true');
+                            return;
+                        }
+                        var allowed = ['image/jpeg', 'image/png', 'image/webp'];
+                        if (allowed.indexOf(file.type) === -1) {
+                            preview.style.display = 'none';
+                            previewImg.src = '';
+                            preview.setAttribute('aria-hidden', 'true');
+                            return;
+                        }
+                        var reader = new FileReader();
+                        reader.onload = function (ev) {
+                            previewImg.src = ev.target.result;
+                            preview.style.display = 'block';
+                            preview.setAttribute('aria-hidden', 'false');
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                }
+            });
+        })();
+    </script>
+{% endblock %}

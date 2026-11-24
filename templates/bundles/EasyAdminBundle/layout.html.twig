@@ -1,0 +1,37 @@
+{% extends '@!EasyAdmin/layout.html.twig' %}
+
+{% block head_metas %}
+    {{ parent() }}
+    <meta name="theme-color" content="#050505">
+{% endblock head_metas %}
+
+{% block configured_stylesheets %}
+    {{ parent() }}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+{% endblock %}
+
+{% block content_top_header %}
+    <span class="content-top-title">
+        {{ ea.crud is null ? ea.dashboardTitle : ea.crud.entityLabelInPlural }}
+    </span>
+    {{ parent() }}
+{% endblock content_top_header %}
+
+{# SUPPRESSION COMPLÈTE DU SÉLECTEUR DE THÈME / APPARENCE D'EASYADMIN #}
+{% block javascript_page_color_scheme %}{% endblock %}
+{% block settings_dropdown_wrapper %}{% endblock %}
+{% block settings_dropdown %}{% endblock %}
+
+{% block header_custom_menu %}
+    <a class="header-icon-link" href="{{ ea_url().setController('App\\Controller\\Admin\\NotificationCrudController').setAction('index') }}" aria-label="Notifications" title="Notifications">
+        <i class="fa fa-bell" aria-hidden="true"></i>
+    </a>
+    {{ parent() }}
+    <a class="header-site-link" href="{{ path('app_home') }}">
+        <i class="fa fa-arrow-up-right-from-square" aria-hidden="true"></i>
+        Voir le site
+    </a>
+{% endblock header_custom_menu %}

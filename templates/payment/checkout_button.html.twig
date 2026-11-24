@@ -1,0 +1,3 @@
+{# Simple template demonstrating a Checkout button that opens a test session #}
+<a href="{{ path('payment_create_checkout', {amount: 320000}) }}" class="action-btn btn-live">Payer en test (3 200,00 €)</a>
+<p style="color:#A1A1A1;margin-top:8px;font-size:13px;">Utilise Stripe en mode test. Configure STRIPE_SECRET_KEY dans .env.local (clé test). STRIPE_WEBHOOK_SECRET est optionnel pour vérifier les webhooks.</p>

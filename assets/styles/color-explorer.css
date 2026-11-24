@@ -1,0 +1,109 @@
+.color-explorer {
+    display: grid;
+    gap: 14px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, .08);
+}
+
+.color-explorer-heading .aag-section-label {
+    margin: 0 0 5px;
+}
+
+.color-explorer-heading p {
+    color: var(--aag-text-muted);
+    font-size: .84rem;
+    line-height: 1.5;
+}
+
+.color-explorer-swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+}
+
+.color-swatch-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 42px;
+    padding: 6px 12px 6px 7px;
+    border: 1px solid rgba(255, 255, 255, .13);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .025);
+    color: var(--aag-text-soft);
+    font: inherit;
+    font-size: .76rem;
+    cursor: pointer;
+    transition: border-color .18s ease, background .18s ease, transform .18s ease, color .18s ease;
+}
+
+.color-swatch-option:hover,
+.color-swatch-option:focus-visible {
+    border-color: rgba(217, 179, 106, .65);
+    background: rgba(217, 179, 106, .07);
+    color: var(--aag-text);
+    outline: none;
+    transform: translateY(-1px);
+}
+
+.color-swatch-option.is-selected {
+    border-color: var(--aag-accent);
+    background: rgba(217, 179, 106, .12);
+    color: var(--aag-accent-soft);
+    box-shadow: 0 0 0 1px rgba(217, 179, 106, .12);
+}
+
+.color-swatch {
+    display: inline-grid;
+    width: 25px;
+    height: 25px;
+    flex: 0 0 25px;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, .32);
+    border-radius: 50%;
+    background-color: var(--swatch-color);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12), 0 2px 7px rgba(0, 0, 0, .26);
+}
+
+.color-swatch-noir {
+    border-color: rgba(255, 255, 255, .52);
+}
+
+.color-swatch-multicolore {
+    background: conic-gradient(#e54d4d 0 16.6%, #f2b544 16.6% 33.2%, #e8db54 33.2% 49.8%, #5eaa6b 49.8% 66.4%, #4c82d3 66.4% 83%, #9960bc 83% 100%);
+}
+
+.color-swatch-all-dot {
+    border-color: rgba(217, 179, 106, .48);
+    background: linear-gradient(135deg, #171717 0 46%, #d9b36a 47% 53%, #f5f1e9 54% 100%);
+    color: #fff;
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+.color-swatch-option.is-selected .color-swatch {
+    box-shadow: 0 0 0 2px #0d0d0d, 0 0 0 3px var(--aag-accent);
+}
+
+@media (max-width: 700px) {
+    .color-explorer {
+        gap: 12px;
+        padding-bottom: 16px;
+    }
+
+    .color-explorer-swatches {
+        gap: 7px;
+    }
+
+    .color-swatch-option {
+        min-height: 39px;
+        padding-right: 10px;
+        font-size: .72rem;
+    }
+
+    .color-swatch {
+        width: 23px;
+        height: 23px;
+        flex-basis: 23px;
+    }
+}

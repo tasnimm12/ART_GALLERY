@@ -1,0 +1,75 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}AI Art Advisor - Abstract Art Gallery{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('styles/favorites.css') }}">
+    <link rel="stylesheet" href="{{ asset('styles/ai-advisor.css') }}">
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script type="module" src="{{ asset('ai-advisor.js') }}"></script>
+{% endblock %}
+
+{% block body %}
+    <div class="advisor-page" data-ai-advisor data-endpoint="{{ path('api_ai_advisor') }}">
+        <header class="advisor-header">
+            <span class="aag-section-label">Conseil personnalisé</span>
+            <h1>AI Art Advisor</h1>
+            <p>Find the artwork that fits your world.</p>
+        </header>
+
+        <section class="advisor-search" aria-labelledby="advisor-search-title">
+            <h2 id="advisor-search-title">Décrivez l’œuvre que vous recherchez</h2>
+            <p>Parlez-nous de votre espace, de vos couleurs préférées, de l’ambiance ou de votre budget.</p>
+            <form data-advisor-form>
+                <label class="sr-only" for="advisor-message">Votre recherche d’œuvre</label>
+                <textarea
+                    id="advisor-message"
+                    name="message"
+                    maxlength="1000"
+                    rows="3"
+                    required
+                    placeholder="Ex. Je cherche une œuvre calme, bleue et minimaliste pour mon salon, maximum 800 €."
+                    data-advisor-input
+                ></textarea>
+                <div class="advisor-form-footer">
+                    <span class="advisor-limit">1 000 caractères maximum</span>
+                    <button type="submit" class="aag-button aag-button--primary" data-advisor-submit>
+                        <span aria-hidden="true">✦</span> Find My Artwork
+                    </button>
+                </div>
+            </form>
+
+            <div class="advisor-suggestions" aria-label="Suggestions de recherche">
+                <span>Suggestions</span>
+                <button type="button" data-advisor-suggestion="Je cherche une œuvre minimaliste et moderne.">🎨 Minimaliste</button>
+                <button type="button" data-advisor-suggestion="Je cherche une œuvre bleue et calme.">🌊 Bleu &amp; calme</button>
+                <button type="button" data-advisor-suggestion="Je cherche une œuvre noire et contemporaine.">🖤 Noir &amp; contemporain</button>
+                <button type="button" data-advisor-suggestion="Je cherche une œuvre inspirée par la nature, sereine et apaisante.">🌿 Nature &amp; sérénité</button>
+                <button type="button" data-advisor-suggestion="Je cherche une œuvre énergique et vibrante.">🔥 Énergique</button>
+            </div>
+        </section>
+
+        <p class="advisor-status" role="status" aria-live="polite" data-advisor-status></p>
+        <div class="advisor-error" role="alert" hidden data-advisor-error></div>
+        <section class="advisor-results" aria-labelledby="advisor-results-title" hidden data-advisor-results>
+            <div class="advisor-results-heading">
+                <div>
+                    <span class="aag-section-label">Sélection personnalisée</span>
+                    <h2 id="advisor-results-title">Notre sélection pour vous</h2>
+                </div>
+                <span class="advisor-result-count" data-advisor-count></span>
+            </div>
+            <p class="advisor-fallback-note" hidden data-advisor-fallback>
+                Le service IA est momentanément indisponible : votre demande a été interprétée localement.
+            </p>
+            <div class="advisor-cards" data-advisor-cards></div>
+            <p class="advisor-empty" hidden data-advisor-empty>
+                Aucune œuvre disponible ne correspond à ces critères. Essayez d’élargir votre recherche ou votre budget.
+            </p>
+        </section>
+    </div>
+{% endblock %}

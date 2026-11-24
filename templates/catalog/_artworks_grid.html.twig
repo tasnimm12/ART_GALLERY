@@ -1,0 +1,51 @@
+{% if artworks|length > 0 %}
+    {% for artwork in artworks %}
+            <article class="art-card anim-reveal">
+                {% set cardImages = [] %}
+                {% for image in artwork.images|slice(0, 5) %}
+                    {% set imagePath = image.filePath %}
+                    {% set imageSrc = imagePath starts with 'http' ? imagePath : (imagePath starts with '/' ? asset(imagePath|trim('/')) : (imagePath starts with 'uploads/' ? asset(imagePath) : asset('uploads/artworks/' ~ imagePath))) %}
+                    {% set cardImages = cardImages|merge([{'src': imageSrc, 'alt': image.altText|default(artwork.title)}]) %}
+                {% endfor %}
+                {% if cardImages is empty and artwork.photo %}
+                    {% set cardImages = [{'src': asset('uploads/artworks/' ~ artwork.photo), 'alt': artwork.title}] %}
+                {% elseif cardImages is empty %}
+                    {% set cardImages = [{'src': 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&w=900&q=80', 'alt': artwork.title}] %}
+                {% endif %}
+                <div
+                    class="art-card-image"
+                    data-gallery-card
+                    data-gallery-card-images="{{ cardImages|json_encode|e('html_attr') }}"
+                    data-gallery-card-interval="1200"
+                >
+                    <img class="gallery-card-image gallery-card-image-main" src="{{ cardImages[0].src }}" alt="{{ cardImages[0].alt }}" width="900" height="1200" data-gallery-card-main>
+                    <img class="gallery-card-image gallery-card-image-incoming" alt="" width="900" height="1200" aria-hidden="true" data-gallery-card-incoming>
+                    {% include 'catalog/_favorite_button.html.twig' with {artwork: artwork, favoriteArtworkIds: favoriteArtworkIds|default([]), buttonClass: 'favorite-button--card'} %}
+                    {% if cardImages|length > 1 %}
+                        <div class="gallery-card-segments" aria-hidden="true">
+                            {% for image in cardImages %}
+                                <span class="gallery-card-segment{% if loop.first %} gallery-card-segment-active{% endif %}" data-gallery-card-segment="{{ loop.index0 }}"></span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    {% if artwork.status %}
+                        <span class="art-card-badge status-{{ artwork.status }}{% if favoriteArtworkIds is defined %} has-favorite-control{% endif %}">
+                            {{ artwork.status|replace({'AVAILABLE':'Disponible','AUCTION':'Enchère','RESERVED':'Réservé','SOLD':'Vendu'}) }}
+                        </span>
+                    {% endif %}
+                </div>
+                <div class="art-card-body">
+                    {% if artwork.category %}<div class="art-card-category">{{ artwork.category.name }}</div>{% endif %}
+                    <h2 class="art-card-title">{{ artwork.title }}</h2>
+                    <div class="art-card-author">Par {{ artwork.artist.name }}</div>
+                    <div class="art-card-meta">{{ artwork.technique|default('Technique mixte') }} · {{ artwork.dimensions|default('Dimensions sur demande') }}</div>
+                    <div class="art-card-footer">
+                        <div class="art-card-price">{{ artwork.price|number_format(0, ',', ' ') }} €</div>
+                        <a href="{{ path('app_catalog_show', {id: artwork.id}) }}" class="art-card-action">Voir l'œuvre →</a>
+                    </div>
+                </div>
+            </article>
+    {% endfor %}
+{% else %}
+    <div class="no-results">Aucune œuvre trouvée.</div>
+{% endif %}

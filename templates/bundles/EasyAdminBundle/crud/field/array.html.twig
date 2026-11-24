@@ -1,0 +1,39 @@
+{# Override EasyAdmin array field rendering to avoid "Array to string conversion" errors.
+   Renders each item safely: if scalar -> print; if object has __toString -> print; if iterable/array -> join recursively; else json_encode as fallback. #}
+{% set items = (value is defined and value is iterable) ? value : (value is defined ? [value] : []) %}
+{% if items is empty %}
+    <span class="badge badge-secondary">0</span>
+{% else %}
+    {% set rendered = [] %}
+    {% for item in items %}
+        {% if item is empty and item is not same as(0) %}
+            {% set rendered = rendered|merge(['']) %}
+        {% elseif item is iterable %}
+            {# flatten inner arrays/iterables into a string #}
+            {% set inner = [] %}
+            {% for k, v in item %}
+                {% if v is iterable %}
+                    {% set inner = inner|merge([v|join(', ')]) %}
+                {% else %}
+                    {% set sv = v|default('') %}
+                    {% if sv is empty and v is not same as(0) %}
+                        {% set inner = inner|merge([v|json_encode]) %}
+                    {% else %}
+                        {% set inner = inner|merge([sv]) %}
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+            {% set rendered = rendered|merge([inner|join(', ')]) %}
+        {% else %}
+            {# Non-iterable item: try default string, otherwise json_encode as fallback #}
+            {% set s = item|default('') %}
+            {% if s is empty and item is not same as(0) %}
+                {% set rendered = rendered|merge([item|json_encode]) %}
+            {% else %}
+                {% set rendered = rendered|merge([s]) %}
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+
+    {{- rendered|filter(v => v is not empty)|join(', ') -}}
+{% endif %}

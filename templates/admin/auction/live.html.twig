@@ -1,0 +1,227 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Live Monitor : {{ auction.artwork.title }} — Abstract Art Gallery{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<link rel="stylesheet" href="{{ asset('styles/auction-harmonized.css') }}">
+<style>
+body {
+    background-color: #050505 !important;
+    color: #FFFFFF !important;
+}
+
+.live-room-container {
+    max-width: 1300px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+.live-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #141414;
+    color: #FFFFFF;
+    padding: 24px 30px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    margin-bottom: 25px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.50);
+}
+
+.live-header h1 {
+    font-size: 24px;
+    font-weight: 800;
+    margin: 0 0 6px 0;
+    letter-spacing: -0.02em;
+}
+
+.live-badge {
+    background: rgba(201, 162, 39, 0.12);
+    border: 1px solid #C9A227;
+    color: #E0C766;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 4px 12px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.live-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr;
+    gap: 25px;
+}
+
+.card {
+    background: #141414;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    padding: 24px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.card h2 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin: 0 0 16px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+    padding-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.price-display {
+    font-size: 38px;
+    font-weight: 800;
+    color: #FFFFFF;
+    margin: 10px 0;
+    letter-spacing: -0.02em;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    font-size: 13.5px;
+}
+
+.stat-label { color: #A1A1A1; }
+.stat-value { font-weight: 700; color: #FFFFFF; }
+
+.bids-scroll {
+    max-height: 420px;
+    overflow-y: auto;
+}
+
+.bid-entry {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    background: #0D0D0D;
+}
+
+.bid-entry.top {
+    background: rgba(201, 162, 39, 0.08);
+    border: 1px solid #C9A227;
+}
+
+.btn-control {
+    padding: 10px 18px;
+    border-radius: 10px;
+    border: none;
+    font-weight: 700;
+    font-size: 13.5px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.15s ease;
+}
+
+.btn-close-auction {
+    background: #C9A227;
+    color: #050505;
+}
+.btn-close-auction:hover {
+    background: #E0C766;
+}
+
+.btn-cancel-auction {
+    background: #0D0D0D;
+    color: #A1A1A1;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.btn-cancel-auction:hover {
+    color: #FFFFFF;
+    border-color: rgba(255, 255, 255, 0.30);
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="auction-harmonized-page">
+<div class="live-room-container">
+
+    <div class="live-header">
+        <div>
+            <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #C9A227; margin-bottom: 4px;">
+                Maison de Vente — Moniteur Live
+            </div>
+            <h1>{{ auction.artwork.title }}</h1>
+            <p style="color: #A1A1A1; margin: 0; font-size: 14px;">Lot #{{ "%03d"|format(auction.id) }} — {{ auction.artwork.artist.name }}</p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 14px;">
+            <span class="live-badge">SALLE DE CONTRÔLE LIVE</span>
+            <a href="{{ path('app_admin_auction_index') }}" style="color: #A1A1A1; text-decoration: none; font-size: 13.5px; font-weight: 600;">← Retour à la liste</a>
+        </div>
+    </div>
+
+    <div class="live-grid">
+        <div class="card">
+            <h2>Statut & Données Financières</h2>
+
+            <div style="text-align: center; padding: 20px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.10); margin-bottom: 16px;">
+                <div style="font-size: 12px; color: #A1A1A1; text-transform: uppercase; letter-spacing: 0.08em;">Prix Actuel du Lot</div>
+                <div class="price-display" id="current-price-display">
+                    {{ (auction.currentPrice ?? auction.startingPrice)|number_format(2, ',', ' ') }} €
+                </div>
+                <div style="font-size: 13px; color: #A1A1A1;">
+                    Dernière offre menante : <strong id="top-bidder" style="color: #FFFFFF;">{{ auction.winner ? (auction.winner.firstName ~ ' ' ~ auction.winner.lastName) : 'Aucune offre pour le moment' }}</strong>
+                </div>
+            </div>
+
+            <div class="stat-row">
+                <span class="stat-label">Prix de départ</span>
+                <span class="stat-value">{{ auction.startingPrice|number_format(2, ',', ' ') }} €</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Pas d'enchère minimal</span>
+                <span class="stat-value">{{ auction.minIncrement|number_format(2, ',', ' ') }} €</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Fin programmée</span>
+                <span class="stat-value">{{ auction.endDate|date('d/m/Y H:i:s') }}</span>
+            </div>
+
+            <div style="margin-top: 24px; display: flex; flex-direction: column; gap: 10px;">
+                <form method="post" action="{{ path('app_admin_auction_index') }}">
+                    <button type="button" class="btn-control btn-close-auction" style="width: 100%;">
+                        Clôturer et adjuger le lot
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Historique des Offres en Direct</h2>
+
+            <div class="bids-scroll" id="bids-container">
+                {% if auction.winner %}
+                    <div class="bid-entry top">
+                        <div>
+                            <strong style="color: #FFFFFF;">{{ auction.winner.firstName }} {{ auction.winner.lastName }}</strong><br>
+                            <small style="color: #A1A1A1;">Offre menante</small>
+                        </div>
+                        <div style="text-align: right;">
+                            <strong style="color: #E0C766; font-size: 16px;">{{ auction.currentPrice|number_format(2, ',', ' ') }} €</strong>
+                        </div>
+                    </div>
+                {% else %}
+                    <div style="text-align: center; color: #A1A1A1; padding: 40px 0;">
+                        En attente des premières enchères en salle...
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}

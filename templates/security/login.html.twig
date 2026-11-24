@@ -1,0 +1,176 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion - Abstract Art Gallery{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .auth-container {
+            max-width: 440px;
+            margin: 60px auto;
+            padding: 35px 30px;
+            background: var(--aag-surface-light);
+            color: var(--aag-surface-light-text);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        .auth-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .auth-header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--aag-surface-light-text);
+            margin-bottom: 8px;
+        }
+        .auth-header p {
+            font-size: 14px;
+            color: var(--aag-surface-light-muted);
+            margin: 0;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--aag-surface-light-text);
+            margin-bottom: 6px;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            font-size: 14px;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            box-sizing: border-box;
+            transition: border-color 0.15s ease-in-out;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--aag-accent);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: var(--aag-surface-light-muted);
+        }
+        .checkbox-group input {
+            margin-right: 8px;
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #ffffff;
+            background: var(--aag-accent);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .btn-submit:hover,
+        .btn-submit:focus-visible {
+            background: var(--aag-accent-hover);
+        }
+        .btn-google {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin-top: 14px;
+            padding: 12px 16px;
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            border-radius: 8px;
+            background: #ffffff;
+            color: var(--aag-surface-light-text);
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 600;
+            transition: border-color 0.2s ease, transform 0.2s ease;
+        }
+        .btn-google:hover,
+        .btn-google:focus-visible {
+            border-color: rgba(15, 23, 42, 0.2);
+            transform: translateY(-1px);
+        }
+        .alert-danger {
+            background-color: #fee2e2;
+            border: 1px solid var(--aag-danger);
+            color: #b91c1c;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .auth-footer {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 14px;
+            color: var(--aag-surface-light-muted);
+        }
+        .auth-footer a {
+            color: var(--aag-accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .auth-footer a:hover,
+        .auth-footer a:focus-visible {
+            text-decoration: underline;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="auth-container">
+    <div class="auth-header">
+        <h1>Connexion</h1>
+        <p>Accédez à votre espace Abstract Art Gallery</p>
+    </div>
+
+    {% if error %}
+        <div class="alert alert-danger" role="alert">
+            {{ error.messageKey|trans(error.messageData, 'security') }}
+        </div>
+    {% endif %}
+
+    <form method="post" action="{{ path('app_login') }}">
+        <div class="form-group">
+            <label for="inputEmail" class="form-label">Adresse Email</label>
+            <input type="email" value="{{ last_username }}" name="email" id="inputEmail" class="form-control" autocomplete="email" required autofocus placeholder="votre@email.com">
+        </div>
+
+        <div class="form-group">
+            <label for="inputPassword" class="form-label">Mot de passe</label>
+            <input type="password" name="password" id="inputPassword" class="form-control" autocomplete="current-password" required placeholder="••••••••">
+        </div>
+
+        <div class="checkbox-group">
+            <label>
+                <input type="checkbox" name="_remember_me"> Se souvenir de moi
+            </label>
+        </div>
+
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+        <button class="btn-submit" type="submit">
+            Se connecter
+        </button>
+
+        <a href="{{ path('connect_google_start') }}" class="btn-google">
+            Se connecter avec Google
+        </a>
+    </form>
+
+    <div class="auth-footer">
+        Pas encore de compte ? <a href="{{ path('app_register') }}">Créer un compte</a>
+    </div>
+</div>
+{% endblock %}

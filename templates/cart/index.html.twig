@@ -1,0 +1,197 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon Panier - Abstract Art Gallery{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .cart-layout {
+            display: grid; grid-template-columns: 2fr 1fr; gap: 30px; margin-top: 20px;
+        }
+        @media (max-width: 860px) { .cart-layout { grid-template-columns: 1fr; } }
+
+        .cart-header { margin-bottom: 28px; }
+        .cart-header h1 {
+            font-size: clamp(2.2rem, 4vw, 4rem); color: var(--aag-text); margin: 0 0 8px; line-height: 0.9; letter-spacing: -0.05em;
+        }
+        .cart-header p { color: var(--aag-text-muted); margin: 0; }
+
+        .cart-table-card,
+        .cart-summary-card,
+        .empty-cart-box {
+            background: linear-gradient(180deg, rgba(18,16,13,0.92), rgba(17,17,17,0.8));
+            border: 1px solid rgba(209,169,93,0.18);
+            border-radius: 24px;
+            box-shadow: 0 22px 42px rgba(0,0,0,0.12);
+        }
+
+        .cart-table-card { overflow: hidden; }
+        .cart-table { width: 100%; border-collapse: collapse; }
+        .cart-table th {
+            background: rgba(255,255,255,0.02); padding: 16px 20px; text-align: left; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--aag-text-muted); border-bottom: 1px solid var(--aag-border);
+        }
+        .cart-table td {
+            padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; color: var(--aag-text-soft);
+        }
+        .cart-table tr:last-child td { border-bottom: none; }
+
+        .cart-item-info { display: flex; align-items: center; gap: 16px; }
+        .cart-item-img {
+            width: 74px; height: 74px; border-radius: 14px; object-fit: cover; background: linear-gradient(135deg, rgba(209,169,93,0.4), rgba(255,255,255,0.08)); display: flex; align-items: center; justify-content: center; color: var(--aag-text); font-size: 24px; flex-shrink: 0; border: 1px solid rgba(209,169,93,0.24);
+        }
+        .cart-item-title {
+            font-weight: 700; font-size: 1rem; color: var(--aag-text); margin-bottom: 4px;
+        }
+        .cart-item-title a { color: inherit; text-decoration: none; }
+        .cart-item-artist { font-size: 0.82rem; color: var(--aag-text-muted); }
+        .cart-item-price { font-size: 1.05rem; font-weight: 700; color: var(--aag-text); }
+
+        .btn-remove {
+            color: #f7b4b4; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); padding: 7px 12px; border-radius: 999px; text-decoration: none; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.15s ease;
+        }
+        .btn-remove:hover, .btn-remove:focus-visible { background: rgba(239,68,68,0.12); }
+
+        .cart-summary-card { padding: 24px; height: fit-content; }
+        .summary-title {
+            font-size: 1.2rem; font-weight: 700; color: var(--aag-text); margin: 0 0 18px; padding-bottom: 12px; border-bottom: 1px solid var(--aag-border);
+        }
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.92rem; color: var(--aag-text-soft); }
+        .summary-total-row {
+            display: flex; justify-content: space-between; margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--aag-border); font-size: 1.5rem; font-weight: 800; color: var(--aag-text);
+        }
+        .btn-checkout {
+            width: 100%; display: block; text-align: center; padding: 16px; background: linear-gradient(135deg, var(--aag-accent), var(--aag-accent-warm)); color: #130f0b; text-decoration: none; border-radius: 14px; font-weight: 800; font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; margin-top: 25px;
+        }
+        .cart-actions-bar { display: flex; justify-content: space-between; margin-top: 20px; }
+        .empty-cart-box { text-align: center; padding: 58px 20px; }
+        .empty-cart-icon { font-size: 56px; margin-bottom: 15px; }
+
+        .alert-flash {
+            padding: 12px 18px; border-radius: 12px; font-size: 0.92rem; margin-bottom: 20px; border: 1px solid transparent;
+        }
+        .alert-success { background: rgba(169,216,182,0.08); color: var(--aag-success); border-color: rgba(169,216,182,0.2); }
+        .alert-info { background: rgba(209,169,93,0.08); color: var(--aag-accent-soft); border-color: rgba(209,169,93,0.2); }
+        .alert-error { background: rgba(239,68,68,0.08); color: #f7b4b4; border-color: rgba(239,68,68,0.2); }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="cart-header">
+    <h1>Mon Panier d'Œuvres</h1>
+    <p>Pièces d'art sélectionnées réservées pour votre commande</p>
+</div>
+
+{% for label, messages in app.flashes %}
+    {% for message in messages %}
+        <div class="alert-flash alert-{{ label }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endfor %}
+
+{% if items|length > 0 %}
+    <div class="cart-layout">
+        <div>
+            <div class="cart-table-card">
+                <table class="cart-table">
+                    <thead>
+                        <tr>
+                            <th>Œuvre d'Art</th>
+                            <th>Technique & Dimensions</th>
+                            <th>Prix</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                            {% set artwork = item.artwork %}
+                            <tr>
+                                <td>
+                                    <div class="cart-item-info">
+                                        {% set primaryImg = artwork.images|first %}
+                                        {% if primaryImg %}
+                                            {% set imagePath = primaryImg.filePath %}
+                                            {% set imageSrc = imagePath starts with 'http' ? imagePath : (imagePath starts with '/' ? asset(imagePath|trim('/')) : (imagePath starts with 'uploads/' ? asset(imagePath) : asset('uploads/artworks/' ~ imagePath))) %}
+                                            <img src="{{ imageSrc }}" alt="{{ artwork.title }}" class="cart-item-img">
+                                        {% elseif artwork.photo %}
+                                            <img src="{{ asset('uploads/artworks/' ~ artwork.photo) }}" alt="{{ artwork.title }}" class="cart-item-img">
+                                        {% else %}
+                                            <div class="cart-item-img">🎨</div>
+                                        {% endif %}
+                                        <div>
+                                            <div class="cart-item-title">
+                                                <a href="{{ path('app_catalog_show', {id: artwork.id}) }}" style="color: inherit; text-decoration: none;">
+                                                    {{ artwork.title }}
+                                                </a>
+                                            </div>
+                                            <div class="cart-item-artist">Par {{ artwork.artist.name }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="font-size: 13px; color: var(--aag-surface-light-muted);">{{ artwork.technique|default('Technique mixte') }}</div>
+                                    <div style="font-size: 12px; color: var(--aag-surface-light-muted);">{{ artwork.dimensions|default('-') }}</div>
+                                </td>
+                                <td>
+                                    <div class="cart-item-price">{{ item.price|number_format(2, ',', ' ') }} €</div>
+                                </td>
+                                <td>
+                                    <a href="{{ path('app_cart_remove', {id: artwork.id}) }}" class="btn-remove" onclick="return confirm('Retirer cette œuvre du panier ?')">
+                                        Supprimer
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="cart-actions-bar">
+                <a href="{{ path('app_catalog_index') }}" class="nav-btn nav-btn-outline">&larr; Continuer mes découvertes</a>
+                <a href="{{ path('app_cart_clear') }}" class="nav-btn nav-btn-danger" onclick="return confirm('Vider l\'intégralité du panier ?')">Vider le panier</a>
+            </div>
+        </div>
+
+        <div>
+            <div class="cart-summary-card">
+                <h3 class="summary-title">Récapitulatif</h3>
+                
+                <div class="summary-row">
+                    <span>Nombre d'œuvres</span>
+                    <span><strong>{{ count }}</strong> pièce(s)</span>
+                </div>
+                <div class="summary-row">
+                    <span>Sous-total</span>
+                    <span>{{ total|number_format(2, ',', ' ') }} €</span>
+                </div>
+                <div class="summary-row">
+                    <span>Certificats d'authenticité</span>
+                    <span style="color: #15803d; font-weight: 600;">Inclus</span>
+                </div>
+                <div class="summary-row">
+                    <span>Livraison sécurisée sur-mesure</span>
+                    <span style="color: #15803d; font-weight: 600;">Offerte</span>
+                </div>
+
+                <div class="summary-total-row">
+                    <span>Total TTC</span>
+                    <span>{{ total|number_format(2, ',', ' ') }} €</span>
+                </div>
+
+                <a href="{{ path('app_order_checkout') }}" class="btn-checkout">
+                    Passer la commande &rarr;
+                </a>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="empty-cart-box">
+        <div class="empty-cart-icon">🛒</div>
+        <h2>Votre panier est vide</h2>
+        <p style="color: var(--aag-surface-light-muted); margin-bottom: 25px;">Vous n'avez pas encore sélectionné d'œuvres d'art.</p>
+        <a href="{{ path('app_catalog_index') }}" class="nav-btn nav-btn-primary" style="padding: 12px 24px; font-size: 15px;">
+            Explorer le Catalogue
+        </a>
+    </div>
+{% endif %}
+{% endblock %}

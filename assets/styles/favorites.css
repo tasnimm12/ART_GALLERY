@@ -1,0 +1,208 @@
+.favorite-button {
+    display: inline-grid;
+    width: 42px;
+    min-width: 42px;
+    height: 42px;
+    place-items: center;
+    border: 1px solid rgba(217, 179, 106, 0.52);
+    border-radius: 50%;
+    background: rgba(8, 8, 8, 0.72);
+    color: #f8f2ea;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: color .2s ease, background .2s ease, border-color .2s ease, transform .2s ease, box-shadow .2s ease;
+}
+
+.favorite-button:hover,
+.favorite-button:focus-visible {
+    border-color: var(--aag-accent);
+    background: rgba(217, 179, 106, 0.16);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .3);
+    outline: none;
+    transform: scale(1.06);
+}
+
+.favorite-button:active {
+    transform: scale(.92);
+}
+
+.favorite-button.is-favorite {
+    color: var(--aag-accent-warm);
+}
+
+.favorite-button-icon {
+    font-family: Arial, sans-serif;
+    font-size: 1.55rem;
+    line-height: 1;
+    transition: transform .22s cubic-bezier(.22, 1, .36, 1);
+}
+
+.favorite-button.is-favorite .favorite-button-icon {
+    transform: scale(1.08);
+}
+
+.favorite-button:disabled {
+    cursor: wait;
+    opacity: .65;
+}
+
+.favorite-button--card {
+    position: absolute;
+    z-index: 4;
+    top: 12px;
+    right: 12px;
+}
+
+.art-card-image[data-gallery-card] .art-card-badge.has-favorite-control {
+    right: auto;
+    left: 12px;
+}
+
+.favorite-button--detail {
+    display: inline-flex;
+    width: auto;
+    min-width: 0;
+    height: 46px;
+    gap: 9px;
+    border-radius: 999px;
+    padding: 0 18px;
+    font: inherit;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+.favorite-button--detail .favorite-button-icon {
+    font-size: 1.35rem;
+}
+
+.nav-favorites-link {
+    gap: 7px;
+    white-space: nowrap;
+}
+
+.nav-favorites-count {
+    display: inline-grid;
+    min-width: 19px;
+    height: 19px;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(217, 179, 106, .16);
+    color: var(--aag-accent-soft);
+    font-size: .62rem;
+    letter-spacing: 0;
+}
+
+.favorites-page {
+    padding: 42px 0 32px;
+}
+
+.favorites-header {
+    margin-bottom: 34px;
+}
+
+.favorites-header .aag-section-label {
+    margin-bottom: 14px;
+}
+
+.favorites-header h1 {
+    margin: 0 0 12px;
+    color: var(--aag-text);
+    font-size: clamp(3rem, 5vw, 5.2rem);
+    letter-spacing: -.06em;
+}
+
+.favorites-header p {
+    color: var(--aag-text-muted);
+    font-size: 1.05rem;
+    line-height: 1.7;
+}
+
+.favorites-empty {
+    display: grid;
+    min-height: 280px;
+    justify-items: center;
+    align-content: center;
+    gap: 16px;
+    border: 1px solid rgba(217, 179, 106, .24);
+    border-radius: 20px;
+    background: rgba(16, 16, 16, .68);
+    padding: 36px 20px;
+    text-align: center;
+}
+
+.favorites-empty[hidden] {
+    display: none;
+}
+
+.favorites-empty-heart {
+    color: var(--aag-accent);
+    font-family: Arial, sans-serif;
+    font-size: 2.6rem;
+    line-height: 1;
+}
+
+.favorites-empty p {
+    color: var(--aag-text-soft);
+    font-family: var(--aag-font-serif);
+    font-size: clamp(1.4rem, 3vw, 1.9rem);
+}
+
+.favorite-toast-region {
+    position: fixed;
+    z-index: 120;
+    right: 24px;
+    bottom: 24px;
+    display: grid;
+    gap: 8px;
+    width: min(360px, calc(100vw - 32px));
+    pointer-events: none;
+}
+
+.favorite-toast {
+    border: 1px solid rgba(217, 179, 106, .42);
+    border-radius: 12px;
+    background: rgba(18, 17, 15, .96);
+    box-shadow: 0 14px 38px rgba(0, 0, 0, .38);
+    padding: 13px 16px;
+    color: var(--aag-text-soft);
+    font-size: .88rem;
+    line-height: 1.5;
+    pointer-events: auto;
+    animation: favorite-toast-in .22s ease-out both;
+}
+
+.favorite-toast a {
+    display: inline-block;
+    margin-left: 5px;
+    color: var(--aag-accent-warm);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+@keyframes favorite-toast-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 700px) {
+    .favorites-page {
+        padding-top: 28px;
+    }
+
+    .favorites-header {
+        margin-bottom: 24px;
+    }
+
+    .favorite-button--card {
+        width: 38px;
+        min-width: 38px;
+        height: 38px;
+    }
+
+    .favorite-toast-region {
+        right: 16px;
+        bottom: 16px;
+    }
+}

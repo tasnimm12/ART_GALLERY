@@ -1,0 +1,163 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ artist.name }} - Artiste - Abstract Art Gallery{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .breadcrumb {
+            margin-bottom: 28px;
+            font-size: 0.76rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--aag-text-muted);
+        }
+        .breadcrumb a { color: var(--aag-accent); text-decoration: none; }
+
+        .artist-profile-header {
+            background: linear-gradient(180deg, rgba(18,16,13,0.94), rgba(17,17,17,0.82));
+            color: var(--aag-text);
+            border-radius: 30px;
+            padding: 32px 28px;
+            border: 1px solid rgba(209,169,93,0.18);
+            box-shadow: 0 22px 40px rgba(0,0,0,0.14);
+            margin-bottom: 34px;
+            display: flex; gap: 30px; align-items: flex-start;
+        }
+
+        @media (max-width: 768px) {
+            .artist-profile-header { flex-direction: column; align-items: center; text-align: center; }
+        }
+
+        .artist-avatar-huge {
+            width: 110px; height: 110px; border-radius: 50%;
+            background: linear-gradient(135deg, rgba(209,169,93,0.9), rgba(166,125,59,0.7));
+            color: #18120d; display: flex; align-items: center; justify-content: center; font-size: 44px; font-weight: 800; flex-shrink: 0;
+        }
+
+        .artist-info-main h1 {
+            font-size: clamp(2.4rem, 4vw, 4rem); font-weight: 600; color: var(--aag-text); margin: 0 0 10px; line-height: 0.9; letter-spacing: -0.05em;
+        }
+
+        .artist-meta-tags { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; font-size: 0.74rem; color: var(--aag-text-soft); }
+        .artist-meta-tag {
+            background: rgba(255,255,255,0.02); border: 1px solid rgba(209,169,93,0.2); padding: 6px 10px; border-radius: 999px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700;
+        }
+
+        .artist-bio-text { color: var(--aag-text-soft); line-height: 1.8; font-size: 1rem; margin-bottom: 16px; }
+        .artist-link-web { color: var(--aag-accent-soft); text-decoration: none; font-weight: 700; font-size: 0.76rem; letter-spacing: 0.12em; text-transform: uppercase; }
+        .artist-link-web:hover, .artist-link-web:focus-visible { text-decoration: underline; }
+
+        .artworks-section-title {
+            font-size: clamp(2rem, 3vw, 3rem); font-weight: 600; color: var(--aag-text); margin-bottom: 20px; letter-spacing: -0.04em; line-height: 0.92;
+        }
+
+        .artworks-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; margin-bottom: 40px;
+        }
+        .artwork-card {
+            background: linear-gradient(180deg, rgba(18,16,13,0.9), rgba(17,17,17,0.78)); color: var(--aag-text); border-radius: 22px; overflow: hidden; border: 1px solid rgba(209,169,93,0.18); transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; box-shadow: 0 18px 32px rgba(0,0,0,0.08);
+        }
+        .artwork-card:hover {
+            transform: translateY(-4px); border-color: rgba(209,169,93,0.6); box-shadow: 0 26px 44px rgba(0,0,0,0.14);
+        }
+        .artwork-image-wrapper {
+            height: 220px; background: linear-gradient(135deg, rgba(209,169,93,0.28), rgba(0,0,0,0.1)); display: flex; align-items: center; justify-content: center; font-size: 40px; color: white; overflow: hidden;
+        }
+        .artwork-image-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        .artwork-body { padding: 16px; }
+        .artwork-title { font-size: 1.2rem; font-weight: 700; color: var(--aag-text); margin: 0 0 6px; }
+        .artwork-price-row {
+            display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--aag-border);
+        }
+        .price-text { font-size: 1.1rem; font-weight: 700; color: var(--aag-text); }
+        .btn-view {
+            display: inline-flex; align-items: center; justify-content: center; padding: 8px 12px; border-radius: 999px; border: 1px solid rgba(209,169,93,0.3); background: rgba(209,169,93,0.06); color: var(--aag-accent-soft); text-decoration: none; font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="breadcrumb">
+    <a href="{{ path('app_home') }}">Accueil</a> &rarr; 
+    <a href="{{ path('app_artist_index') }}">Artistes</a> &rarr; 
+    <span>{{ artist.name }}</span>
+</div>
+
+<div class="artist-profile-header">
+    {% if artist.photo %}
+        <img src="{{ asset('uploads/artists/' ~ artist.photo) }}" alt="{{ artist.name }}" style="width:110px;height:110px;border-radius:50%;object-fit:cover;flex-shrink:0;">
+    {% else %}
+        <div class="artist-avatar-huge">
+            {{ artist.name|slice(0, 1) }}
+        </div>
+    {% endif %}
+    <div class="artist-info-main">
+        <h1>{{ artist.name }}</h1>
+        <div class="artist-meta-tags">
+            <span class="artist-meta-tag">📍 {{ artist.country|default('Origine internationale') }}</span>
+            <span class="artist-meta-tag">🎨 {{ artworks|length }} œuvre(s) exposée(s)</span>
+        </div>
+
+        <div class="artist-bio-text">
+            {{ artist.biography|default('Artiste résident de la galerie Abstract Art Gallery.')|nl2br }}
+        </div>
+
+        {% if artist.website %}
+            <div>
+                <a href="{{ artist.website }}" target="_blank" rel="noopener" class="artist-link-web">
+                    🌐 Visiter le site web officiel &rarr;
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<h2 class="artworks-section-title">Œuvres de {{ artist.name }}</h2>
+
+{% if artworks|length > 0 %}
+    <div class="artworks-grid">
+        {% for artwork in artworks %}
+            <div class="artwork-card">
+                <div class="artwork-image-wrapper">
+                    {% set primaryImage = null %}
+                    {% for img in artwork.images %}
+                        {% if img.isPrimary or primaryImage is null %}
+                            {% set primaryImage = img %}
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if primaryImage %}
+                        {% set imagePath = primaryImage.filePath %}
+                        {% set imageSrc = imagePath starts with 'http' ? imagePath : (imagePath starts with '/' ? asset(imagePath|trim('/')) : (imagePath starts with 'uploads/' ? asset(imagePath) : asset('uploads/artworks/' ~ imagePath))) %}
+                        <img src="{{ imageSrc }}" alt="{{ artwork.title }}">
+                    {% elseif artwork.photo %}
+                        <img src="{{ asset('uploads/artworks/' ~ artwork.photo) }}" alt="{{ artwork.title }}">
+                    {% else %}
+                        <span>🖼️</span>
+                    {% endif %}
+                </div>
+                <div class="artwork-body">
+                    <h3 class="artwork-title">{{ artwork.title }}</h3>
+                    <div style="font-size: 13px; color: var(--aag-surface-light-muted);">
+                        {{ artwork.technique|default('Technique mixte') }}
+                        {% if artwork.dimensions %} • {{ artwork.dimensions }}{% endif %}
+                    </div>
+                    <div class="artwork-price-row">
+                        <div class="price-text">
+                            {% if artwork.price %}
+                                {{ artwork.price|number_format(2, ',', ' ') }} {{ artwork.currency }}
+                            {% else %}
+                                Sur demande
+                            {% endif %}
+                        </div>
+                        <a href="{{ path('app_catalog_show', {id: artwork.id}) }}" class="btn-view">Consulter</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p style="color: var(--aag-surface-light-muted);">Cet artiste n'a pas encore d'œuvres répertoriées.</p>
+{% endif %}
+{% endblock %}

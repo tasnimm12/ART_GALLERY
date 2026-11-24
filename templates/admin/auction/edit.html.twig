@@ -1,0 +1,84 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier un Lot d'Enchère — Abstract Art Gallery{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<link rel="stylesheet" href="{{ asset('styles/auction-harmonized.css') }}">
+<style>
+/* Reuse new form styles */
+body { background-color: #050505 !important; color: #FFFFFF !important; }
+.form-container{ max-width:800px;margin:40px auto;background:#141414;padding:35px;border-radius:16px;border:1px solid rgba(255,255,255,0.10);box-shadow:0 16px 40px rgba(0,0,0,0.50);} 
+.form-header{ margin-bottom:25px;border-bottom:1px solid rgba(255,255,255,0.10);padding-bottom:15px;}
+.form-header h1{ font-size:26px;font-weight:800;color:#FFFFFF;margin:0 0 6px 0;}
+.form-row label{ display:block;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#A1A1A1;margin-bottom:8px;}
+.form-row input,.form-row select{ width:100%;padding:12px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.12);font-size:14px;background:#0D0D0D;color:#FFFFFF;}
+.form-actions{ display:flex;justify-content:flex-end;gap:12px;margin-top:30px;border-top:1px solid rgba(255,255,255,0.10);padding-top:20px;}
+.btn-submit{ background:#C9A227;color:#050505;padding:12px 24px;border-radius:10px;border:none;font-size:14px;font-weight:700;cursor:pointer;}
+.btn-cancel{ background:#0D0D0D;color:#FFFFFF;border:1px solid rgba(255,255,255,0.12);padding:12px 20px;border-radius:10px;text-decoration:none;font-size:14px;font-weight:600;}
+.btn-submit:hover{ background:#E0C766; }
+.btn-cancel:hover{ border-color:#C9A227;color:#C9A227; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="auction-harmonized-page">
+<div class="form-container">
+    <div class="form-header">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#C9A227;margin-bottom:6px;">Maison de Vente</div>
+        <h1>Modifier un Lot d'Enchère</h1>
+        <p style="color:#A1A1A1;margin:0;font-size:14px;">Mettez à jour les paramètres de mise en vente et publiez vos modifications.</p>
+    </div>
+
+    {{ form_start(form, {'attr': {'class': 'auction-form', 'novalidate': 'novalidate', 'autocomplete': 'off'}}) }}
+
+        <div class="form-row">
+            {{ form_label(form.artwork, 'ŒUVRE DU CATALOGUE') }}
+            {{ form_widget(form.artwork) }}
+            {{ form_errors(form.artwork) }}
+            <div class="form-help">Seules les œuvres avec le statut « Disponible » peuvent être mises aux enchères.</div>
+        </div>
+
+        <div class="form-grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+            <div class="form-row">
+                {{ form_label(form.startingPrice, 'PRIX DE DÉPART (€)') }}
+                {{ form_widget(form.startingPrice) }}
+                {{ form_errors(form.startingPrice) }}
+            </div>
+            <div class="form-row">
+                {{ form_label(form.reservePrice, 'PRIX DE RÉSERVE (€, OPTIONNEL)') }}
+                {{ form_widget(form.reservePrice) }}
+                {{ form_errors(form.reservePrice) }}
+                <div class="form-help">Prix minimum confidentiel en dessous duquel l'œuvre ne sera pas adjugée.</div>
+            </div>
+        </div>
+
+        <div class="form-row">
+            {{ form_label(form.minIncrement, 'PAS D\'ENCHÈRE MINIMUM (€)') }}
+            {{ form_widget(form.minIncrement) }}
+            {{ form_errors(form.minIncrement) }}
+            <div class="form-help">Incrément minimal requis entre deux offres consécutives.</div>
+        </div>
+
+        <div class="form-grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+            <div class="form-row">
+                {{ form_label(form.startDate, 'DATE ET HEURE DE DÉBUT') }}
+                {{ form_widget(form.startDate) }}
+                {{ form_errors(form.startDate) }}
+            </div>
+            <div class="form-row">
+                {{ form_label(form.endDate, 'DATE ET HEURE DE FIN') }}
+                {{ form_widget(form.endDate) }}
+                {{ form_errors(form.endDate) }}
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ path('app_admin_auction_index') }}" class="btn-cancel">Annuler</a>
+            <button type="submit" class="btn-submit">Enregistrer les modifications</button>
+        </div>
+
+    {{ form_end(form) }}
+</div>
+</div>
+{% endblock %}

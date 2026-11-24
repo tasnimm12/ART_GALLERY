@@ -1,0 +1,7 @@
+{% extends '@!EasyAdmin/crud/detail.html.twig' %}
+
+{% block main %}
+    <div class="admin-detail-shell" data-crud-kind="{{ entity.name|default('crud')|lower }}">
+        {{ parent() }}
+    </div>
+{% endblock %}

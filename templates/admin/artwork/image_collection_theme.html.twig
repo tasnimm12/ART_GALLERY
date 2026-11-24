@@ -1,0 +1,52 @@
+{% block collection_row %}
+    {% if prototype is defined and not prototype.rendered %}
+        {% set row_attr = row_attr|merge({'data-prototype': form_row(prototype)}) %}
+    {% endif %}
+
+    {% set row_attr = row_attr|merge({
+        'data-artwork-image-collection': '',
+        'data-ea-collection-field': 'true',
+        'data-allow-add': allow_add ? 'true' : 'false',
+        'data-allow-delete': allow_delete ? 'true' : 'false',
+    }) %}
+
+    {{ block('form_row') }}
+{% endblock %}
+
+{% block collection_widget %}
+    <div class="artwork-images-field">
+        <p class="artwork-images-help">JPG, PNG ou WebP · 5 Mo maximum par image · 5 images maximum. Le minimum de 4 images s’applique à la création.</p>
+        <div
+            {{ block('widget_container_attributes') }}
+            data-index="{{ form|length }}"
+        >
+            {% for imageForm in form %}
+                {{ form_row(imageForm) }}
+            {% endfor %}
+        </div>
+
+        <button type="button" class="btn btn-secondary" data-artwork-image-add>Ajouter une image</button>
+    </div>
+{% endblock %}
+
+{% block collection_entry_row %}
+    {% set imagePath = form.vars.data.filePath|default(null) %}
+    <div class="artwork-image-item" data-artwork-image-item>
+        {% if imagePath %}
+            {% set imageSrc = imagePath starts with 'http' ? imagePath : (imagePath starts with '/' ? asset(imagePath|trim('/')) : (imagePath starts with 'uploads/' ? asset(imagePath) : asset('uploads/artworks/' ~ imagePath))) %}
+            <img class="artwork-image-preview" src="{{ imageSrc }}" alt="{{ form.vars.data.altText|default('Aperçu de l’image') }}">
+        {% else %}
+            <img class="artwork-image-preview" alt="Aperçu de l’image" hidden>
+        {% endif %}
+
+        {{ form_row(form.imageFile) }}
+        {{ form_row(form.altText) }}
+        {{ form_widget(form.displayOrder) }}
+        {{ form_row(form.isPrimary) }}
+        <div class="artwork-image-item-actions">
+            <button type="button" class="btn btn-secondary" data-artwork-image-up aria-label="Monter l’image">Monter</button>
+            <button type="button" class="btn btn-secondary" data-artwork-image-down aria-label="Descendre l’image">Descendre</button>
+            <button type="button" class="btn btn-danger" data-artwork-image-remove>Supprimer</button>
+        </div>
+    </div>
+{% endblock %}

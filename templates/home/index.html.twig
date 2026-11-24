@@ -1,0 +1,479 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ app.request.pathInfo == '/a-propos' ? 'À propos - Abstract Art Gallery' : 'Accueil - Abstract Art Gallery' }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('styles/daily-artwork.css') }}">
+    <style>
+        .home-hero {
+            position: relative;
+            min-height: 860px;
+            margin: 12px 0 52px;
+            display: flex;
+            align-items: flex-end;
+            padding: 100px 60px 56px;
+            background:
+                linear-gradient(90deg, rgba(5,5,5,0.92) 0%, rgba(5,5,5,0.74) 38%, rgba(5,5,5,0.28) 100%),
+                url('https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
+            border: 1px solid rgba(217,179,106,0.28);
+            border-radius: 34px;
+            overflow: hidden;
+            box-shadow: 0 34px 80px rgba(0,0,0,0.38);
+        }
+
+        .home-hero::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(8,8,8,0.18), rgba(8,8,8,0.68));
+        }
+
+        .hero-content { position: relative; z-index: 1; max-width: 620px; }
+        .hero-kicker {
+            color: var(--aag-accent); letter-spacing: 0.18em; text-transform: uppercase; font-size: 0.72rem; font-weight: 700; margin-bottom: 20px;
+        }
+        .hero-title {
+            font-size: clamp(3.7rem, 5vw, 6.5rem); line-height: 0.86; margin-bottom: 18px; color: #f5f2ea; max-width: 620px;
+            text-shadow: 0 12px 28px rgba(0,0,0,0.26); letter-spacing: -0.06em;
+        }
+        .hero-subtitle {
+            max-width: 560px; color: var(--aag-text-soft); font-size: 1.12rem; line-height: 1.8; margin-bottom: 30px;
+        }
+        .hero-actions { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 32px; }
+        .hero-scroll {
+            display: inline-flex; align-items: center; gap: 12px; color: rgba(245,242,234,0.8); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase;
+        }
+        .hero-scroll::before {
+            content: ''; display: inline-block; width: 42px; height: 1px; background: rgba(245,242,234,0.5);
+        }
+
+        .section {
+            padding: 118px 0 18px;
+        }
+        .section-header {
+            display: flex; justify-content: space-between; align-items: end; gap: 20px; margin-bottom: 42px;
+        }
+        .section-title {
+            font-size: clamp(2.9rem, 5vw, 4.9rem); color: var(--aag-text); line-height: 0.88; letter-spacing: -0.05em;
+        }
+        .section-link {
+            color: var(--aag-text-soft); text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.7rem; font-weight: 700;
+        }
+
+        .artworks-grid {
+            display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 30px;
+        }
+        .art-card {
+            position: relative; display: block; text-decoration: none; color: inherit; overflow: hidden;
+            background: linear-gradient(180deg, rgba(20,18,16,0.96), rgba(17,17,17,0.82));
+            border: 1px solid rgba(217,179,106,0.28); border-radius: 28px; box-shadow: 0 30px 60px rgba(0,0,0,0.2);
+            transition: transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+        }
+        .art-card:hover {
+            transform: translateY(-10px); border-color: rgba(217,179,106,0.9); box-shadow: 0 44px 80px rgba(0,0,0,0.3);
+        }
+        .art-image-wrap {
+            position: relative; height: 580px; overflow: hidden; background: #111; border-radius: 28px 28px 0 0;
+        }
+        .art-image-wrap img {
+            width: 100%; height: 100%; object-fit: cover; transition: transform 0.7s ease;
+        }
+        .art-card:hover .art-image-wrap img { transform: scale(1.04); }
+        .art-card-overlay {
+            position: absolute; inset: 0; background: linear-gradient(180deg, rgba(8,8,8,0.06), rgba(8,8,8,0.64)); opacity: 0; transition: opacity 0.35s ease;
+        }
+        .art-card:hover .art-card-overlay { opacity: 1; }
+        .art-card-body {
+            position: absolute; left: 0; right: 0; bottom: 0; padding: 22px 22px 18px; z-index: 1;
+        }
+        .art-card-meta {
+            display: flex; justify-content: space-between; align-items: baseline; gap: 12px; color: rgba(245,242,234,0.74); margin-bottom: 6px; font-size: 0.74rem; letter-spacing: 0.14em; text-transform: uppercase;
+        }
+        .art-card-title { font-size: clamp(2rem, 3vw, 2.5rem); margin-bottom: 6px; line-height: 0.9; }
+        .art-card-author { color: rgba(245,242,234,0.78); font-size: 0.95rem; margin-bottom: 10px; }
+        .art-card-price { color: #f5f2ea; font-size: 1.15rem; font-weight: 700; letter-spacing: 0.04em; }
+        .art-card-cta {
+            display: inline-flex; align-items: center; gap: 10px; color: var(--aag-text); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0; transform: translateY(8px); transition: all 0.35s ease;
+        }
+        .art-card:hover .art-card-cta { opacity: 1; transform: translateY(0); }
+
+        .live-auctions { display: grid; gap: 18px; margin-top: 12px; }
+        .auction-card {
+            display: grid; grid-template-columns: minmax(250px, 420px) 1fr; gap: 18px; padding: 20px; border: 1px solid rgba(200,155,69,0.18);
+            background: linear-gradient(180deg, rgba(18,16,14,0.72), rgba(16,16,15,0.62)); border-radius: 26px; align-items: center; box-shadow: 0 18px 34px rgba(0,0,0,0.10);
+        }
+        .auction-card-image { height: 260px; overflow: hidden; background: #111; border-radius: 18px; }
+        .auction-card-image img { width: 100%; height: 100%; object-fit: cover; }
+        .auction-card-body { display: grid; grid-template-columns: 1fr auto; gap: 12px 18px; align-items: center; }
+        .lot-number { color: var(--aag-accent); letter-spacing: 0.14em; text-transform: uppercase; font-size: 0.73rem; font-weight: 700; }
+        .auction-title { font-size: clamp(2rem, 4vw, 3rem); line-height: 0.96; }
+        .auction-price-label, .counter-label { color: var(--aag-text-muted); font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase; }
+        .auction-price { font-size: clamp(2rem, 4vw, 2.8rem); font-family: var(--aag-font-serif); }
+        .auction-counter { font-size: clamp(1.5rem, 2vw, 2rem); font-family: var(--aag-font-serif); color: var(--aag-text); }
+        .live-dot {
+            display: inline-flex; align-items: center; gap: 8px; color: var(--aag-live); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
+        }
+        .live-dot::before {
+            content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--aag-live); box-shadow: 0 0 10px rgba(229,57,53,0.9);
+        }
+
+        .artist-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 28px; }
+        .artist-card {
+            display: block; padding: 24px; border: 1px solid var(--aag-border); background: rgba(18,18,18,0.5); transition: transform 0.25s ease, border-color 0.25s ease;
+        }
+        .artist-card:hover { transform: translateY(-3px); border-color: rgba(199,168,107,0.4); }
+        .artist-card img { height: 420px; width: 100%; object-fit: cover; filter: grayscale(0.16) contrast(1.08); margin-bottom: 18px; }
+        .artist-country { color: var(--aag-accent); text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.7rem; }
+        .artist-name { font-size: clamp(2.1rem, 3vw, 2.8rem); margin: 10px 0; }
+        .artist-movement { color: var(--aag-text-muted); margin-bottom: 14px; }
+        .artist-description { color: var(--aag-text-soft); line-height: 1.7; margin-bottom: 18px; }
+
+        .about-wrap { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 28px; align-items: center; padding-top: 18px; }
+        .about-copy { padding: 30px 0; }
+        .about-title { font-size: clamp(3rem, 5vw, 5rem); line-height: 0.9; margin-bottom: 22px; }
+            color: var(--aag-text-soft); line-height: 1.9; max-width: 620px; font-size: 1.05rem;
+        }
+        .about-image {
+            min-height: 620px; border: 1px solid var(--aag-border); overflow: hidden; background: #111;
+        }
+        .about-image img { width: 100%; height: 100%; object-fit: cover; }
+        .advisor-presentation {
+            max-width: 940px;
+            margin: 72px auto 0;
+            border: 1px solid rgba(217,179,106,0.34);
+            border-radius: 24px;
+            background: linear-gradient(145deg, rgba(22,19,15,0.94), rgba(8,8,8,0.98));
+            padding: clamp(28px, 6vw, 64px);
+            text-align: center;
+            box-shadow: 0 28px 70px rgba(0,0,0,0.24);
+        }
+        .advisor-presentation__mark {
+            display: block;
+            margin-bottom: 16px;
+            color: var(--aag-accent);
+            font-size: 1.5rem;
+        }
+        .advisor-presentation__label {
+            display: block;
+            margin-bottom: 14px;
+            color: var(--aag-accent);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+        .advisor-presentation__title {
+            margin-bottom: 14px;
+            color: var(--aag-text);
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            line-height: 0.98;
+        }
+        .advisor-presentation__subtitle {
+            margin-bottom: 20px;
+            color: var(--aag-text-soft);
+            font-family: var(--aag-font-serif);
+            font-size: clamp(1.35rem, 2.5vw, 1.8rem);
+            line-height: 1.3;
+        }
+        .advisor-presentation__copy {
+            max-width: 720px;
+            margin: 0 auto 14px;
+            color: var(--aag-text-muted);
+            font-size: 0.96rem;
+            line-height: 1.8;
+        }
+        .advisor-presentation__button {
+            width: fit-content;
+            max-width: 100%;
+            margin: 22px auto 0;
+        }
+        .cta-banner {
+            margin-top: 54px; padding: 26px 32px; border: 1px solid var(--aag-border); background: rgba(18,18,18,0.6);
+            display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        }
+        .cta-banner-title { font-size: clamp(2rem, 4vw, 3rem); }
+        @media (max-width: 980px) {
+            .home-hero { min-height: 620px; padding: 68px 28px 36px; }
+            .artworks-grid, .artist-grid { grid-template-columns: 1fr; }
+            .about-wrap { grid-template-columns: 1fr; }
+            .auction-card { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 560px) {
+            .home-hero { min-height: 520px; padding: 48px 18px 26px; }
+            .hero-subtitle { font-size: 1rem; }
+            .section-header { align-items: flex-start; flex-direction: column; }
+            .cta-banner { flex-direction: column; align-items: flex-start; }
+            .auction-card-body { grid-template-columns: 1fr; }
+            .advisor-presentation { margin-top: 48px; padding: 28px 20px; }
+            .advisor-presentation__button { width: 100%; }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <section class="home-hero" aria-label="Art abstrait en vedette">
+        <div class="hero-content">
+            <div class="hero-kicker">Galerie internationale d'art abstrait</div>
+            <h1 class="hero-title anim-enter">L'Art Abstrait dans sa forme la plus pure.</h1>
+            <p class="hero-subtitle">Pièces uniques sélectionnées et ventes aux enchères exclusives.</p>
+            <div class="hero-actions">
+                <a href="{{ path('app_catalog_index') }}" class="aag-button aag-button--primary">Découvrir la collection</a>
+                <a href="{{ path('app_auction_index') }}" class="aag-button aag-button--secondary">Voir les enchères</a>
+            </div>
+            <div class="hero-scroll">Scroll</div>
+        </div>
+    </section>
+
+    {% if dailyArtwork %}
+        {% set dailyImage = dailyArtwork.images|first %}
+        {% set dailyImagePath = dailyImage ? dailyImage.filePath : dailyArtwork.photo %}
+        {% set dailyImageSrc = dailyImagePath
+            ? (dailyImagePath starts with 'http' ? dailyImagePath : (dailyImagePath starts with '/' ? asset(dailyImagePath|trim('/')) : (dailyImagePath starts with 'uploads/' ? asset(dailyImagePath) : asset('uploads/artworks/' ~ dailyImagePath))))
+            : 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&w=1400&q=85' %}
+        <section class="daily-artwork-section" aria-labelledby="daily-artwork-title">
+            <div class="daily-artwork-heading">
+                <span class="aag-section-label">Œuvre du jour</span>
+                <span class="daily-artwork-date">{{ dailyDate|date('d.m.Y') }}</span>
+            </div>
+            <article class="daily-artwork-card">
+                <a class="daily-artwork-visual" href="{{ path('app_catalog_show', {id: dailyArtwork.id}) }}" aria-label="Découvrir {{ dailyArtwork.title }}">
+                    <img src="{{ dailyImageSrc }}" alt="{{ dailyImage and dailyImage.altText ? dailyImage.altText : dailyArtwork.title }}" loading="lazy">
+                    <span class="daily-artwork-visual-label">Œuvre du jour</span>
+                    <span class="daily-artwork-index" aria-hidden="true">01 / 01</span>
+                </a>
+                <div class="daily-artwork-copy">
+                    <span class="daily-artwork-overline">À découvrir aujourd’hui</span>
+                    <h2 id="daily-artwork-title">{{ dailyArtwork.title }}</h2>
+                    {% if dailyArtwork.artist %}
+                        <p class="daily-artwork-artist">{{ dailyArtwork.artist.name }}</p>
+                    {% endif %}
+                    <p class="daily-artwork-year">{{ dailyArtwork.yearCreated ? dailyArtwork.yearCreated|date('Y') : 'Année non renseignée' }}</p>
+                    <p class="daily-artwork-description">
+                        {% set dailyDescription = dailyArtwork.description|default('Une œuvre singulière sélectionnée par notre galerie.') %}
+                        {{ dailyDescription|length > 240 ? dailyDescription|slice(0, 237) ~ '…' : dailyDescription }}
+                    </p>
+                    {% if dailyArtwork.status == 'AVAILABLE' and dailyArtwork.price %}
+                        <p class="daily-artwork-price">{{ dailyArtwork.price|number_format(0, ',', ' ') }} {{ dailyArtwork.currency == 'EUR' ? '€' : dailyArtwork.currency }}</p>
+                    {% endif %}
+                    <a href="{{ path('app_catalog_show', {id: dailyArtwork.id}) }}" class="aag-button aag-button--primary daily-artwork-cta">
+                        Découvrir l’œuvre <span aria-hidden="true">↗</span>
+                    </a>
+                </div>
+            </article>
+        </section>
+    {% endif %}
+
+    <section class="section">
+        <div class="section-header">
+            <span class="aag-section-label">Œuvres sélectionnées</span>
+            <a href="{{ path('app_catalog_index') }}" class="section-link">Voir la collection →</a>
+        </div>
+
+        <div class="artworks-grid">
+            <a href="{{ path('app_catalog_index') }}" class="art-card anim-reveal">
+                <div class="art-image-wrap">
+                    <img src="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&w=800&q=80" alt="Composition #04">
+                    <div class="art-card-overlay"></div>
+                </div>
+                <div class="art-card-body">
+                    <div class="art-card-meta"><span>Composition #04</span><span>2 500 €</span></div>
+                    <div class="art-card-title">Composition #04</div>
+                    <div class="art-card-author">Jean Martin</div>
+                    <div class="art-card-cta">Voir l'œuvre →</div>
+                </div>
+            </a>
+
+            <a href="{{ path('app_catalog_index') }}" class="art-card anim-reveal">
+                <div class="art-image-wrap">
+                    <img src="https://images.unsplash.com/photo-1541961017774-22349e4a1262?auto=format&fit=crop&w=800&q=80" alt="Composition #07">
+                    <div class="art-card-overlay"></div>
+                </div>
+                <div class="art-card-body">
+                    <div class="art-card-meta"><span>Composition #07</span><span>3 800 €</span></div>
+                    <div class="art-card-title">Composition #07</div>
+                    <div class="art-card-author">Claire Fontaine</div>
+                    <div class="art-card-cta">Voir l'œuvre →</div>
+                </div>
+            </a>
+
+            <a href="{{ path('app_catalog_index') }}" class="art-card anim-reveal">
+                <div class="art-image-wrap">
+                    <img src="https://images.unsplash.com/photo-1515405295579-ba7b45403062?auto=format&fit=crop&w=800&q=80" alt="Composition #11">
+                    <div class="art-card-overlay"></div>
+                </div>
+                <div class="art-card-body">
+                    <div class="art-card-meta"><span>Composition #11</span><span>5 200 €</span></div>
+                    <div class="art-card-title">Composition #11</div>
+                    <div class="art-card-author">Pierre Dupont</div>
+                    <div class="art-card-cta">Voir l'œuvre →</div>
+                </div>
+            </a>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="section-header">
+            <span class="aag-section-label">Enchères en cours</span>
+            <a href="{{ path('app_auction_index') }}" class="section-link">Toutes les enchères →</a>
+        </div>
+
+        <div class="live-auctions">
+            <article class="auction-card">
+                <div class="auction-card-image">
+                    <img src="https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?auto=format&fit=crop&w=1000&q=80" alt="Lot #12 - Geometrics">
+                </div>
+                <div class="auction-card-body">
+                    <div>
+                        <div class="lot-number">Lot #12 — Geometrics</div>
+                        <div class="live-dot">Live</div>
+                    </div>
+                    <div>
+                        <div class="auction-price-label">Offre actuelle</div>
+                        <div class="auction-price">4 500 €</div>
+                    </div>
+                    <div>
+                        <div class="counter-label">Fin de l'enchère</div>
+                        <div class="auction-counter" data-countdown="02:00:10">02h : 00m : 10s</div>
+                    </div>
+                    <div>
+                        <a href="{{ path('app_auction_index') }}" class="aag-button aag-button--primary">Placer une offre</a>
+                    </div>
+                </div>
+            </article>
+
+            <article class="auction-card">
+                <div class="auction-card-image">
+                    <img src="https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=1000&q=80" alt="Lot #08 - Mouvement">
+                </div>
+                <div class="auction-card-body">
+                    <div>
+                        <div class="lot-number">Lot #08 — Mouvement</div>
+                        <div class="live-dot">Live</div>
+                    </div>
+                    <div>
+                        <div class="auction-price-label">Offre actuelle</div>
+                        <div class="auction-price">6 200 €</div>
+                    </div>
+                    <div>
+                        <div class="counter-label">Fin de l'enchère</div>
+                        <div class="auction-counter" data-countdown="05:32:52">05h : 32m : 52s</div>
+                    </div>
+                    <div>
+                        <a href="{{ path('app_auction_index') }}" class="aag-button aag-button--primary">Placer une offre</a>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="section-header">
+            <span class="aag-section-label">Artistes</span>
+            <a href="{{ path('app_artist_index') }}" class="section-link">Tous les artistes →</a>
+        </div>
+
+        <div class="artist-grid">
+            <article class="artist-card">
+                <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=900&q=80" alt="Laura Miro">
+                <div class="artist-country">France</div>
+                <h3 class="artist-name">Laura Miro</h3>
+                <div class="artist-movement">Expression abstraite</div>
+                <p class="artist-description">Son travail explore la tension entre matière, mémoire et équilibre chromatique avec une énergie sensuelle et structurée.</p>
+                <a href="{{ path('app_artist_index') }}" class="aag-button aag-button--secondary">Découvrir l'artiste →</a>
+            </article>
+
+            <article class="artist-card">
+                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=900&q=80" alt="Claire Fontaine">
+                <div class="artist-country">Belgique</div>
+                <h3 class="artist-name">Claire Fontaine</h3>
+                <div class="artist-movement">Minimalisme géométrique</div>
+                <p class="artist-description">Une pratique raffinée de lignes, de repères et de silence visuel, alliant précision architecturale et émotion vive.</p>
+                <a href="{{ path('app_artist_index') }}" class="aag-button aag-button--secondary">Découvrir l'artiste →</a>
+            </article>
+
+            <article class="artist-card">
+                <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=900&q=80" alt="Nicolas Voss">
+                <div class="artist-country">Allemagne</div>
+                <h3 class="artist-name">Nicolas Voss</h3>
+                <div class="artist-movement">Avant-garde texturée</div>
+                <p class="artist-description">Des compositions gestuelles aux surfaces profondes, où le rythme, la matière et la lumière deviennent des outils d'émotion.</p>
+                <a href="{{ path('app_artist_index') }}" class="aag-button aag-button--secondary">Découvrir l'artiste →</a>
+            </article>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="about-wrap">
+            <div class="about-copy">
+                <span class="aag-section-label">À propos</span>
+                <h2 class="about-title">Une galerie, une vision.</h2>
+                <p>Abstract Art Gallery sélectionne des artistes contemporains au talent affirmé et met en lumière des œuvres singulières, pensées pour les collections internationales et les espaces exigeants. Chaque pièce est présentée avec la même exigence de qualité, d'authenticité et d'élégance.</p>
+            </div>
+            <div class="about-image">
+                <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1000&q=80" alt="Galerie d'art abstrait">
+            </div>
+        </div>
+
+        <section class="advisor-presentation" aria-labelledby="advisor-presentation-title">
+            <span class="advisor-presentation__mark" aria-hidden="true">✦</span>
+            <span class="advisor-presentation__label">Intelligence artificielle</span>
+            <h2 class="advisor-presentation__title" id="advisor-presentation-title">AI Art Advisor</h2>
+            <p class="advisor-presentation__subtitle">Une nouvelle façon de découvrir l’œuvre qui vous correspond.</p>
+            <p class="advisor-presentation__copy">AI Art Advisor vous accompagne dans votre recherche artistique. Décrivez vos goûts, les couleurs que vous aimez, l’ambiance de votre espace ou votre budget, et laissez notre assistant vous proposer des œuvres adaptées à votre univers.</p>
+            <p class="advisor-presentation__copy">Que vous recherchiez une œuvre minimaliste, une composition colorée, une atmosphère calme ou une pièce contemporaine, AI Art Advisor vous aide à explorer la collection autrement.</p>
+            <a href="{{ path('app_ai_advisor') }}" class="aag-button aag-button--primary advisor-presentation__button">
+                <span aria-hidden="true">✦</span> Découvrir AI Art Advisor
+            </a>
+        </section>
+    </section>
+
+    <section class="section" aria-labelledby="gallery-location-title">
+        <div class="gallery-location">
+            <div class="gallery-location__header">
+                <span class="gallery-location__eyebrow">Visit the Gallery</span>
+                <h2 class="gallery-location__title" id="gallery-location-title">Abstract Art Gallery</h2>
+                <p class="gallery-location__address">{{ galleryLocation.address }}</p>
+            </div>
+
+            <div
+                id="gallery-map"
+                class="gallery-map"
+                data-latitude="{{ galleryLocation.latitude }}"
+                data-longitude="{{ galleryLocation.longitude }}"
+                data-address="{{ galleryLocation.address }}"
+                data-name="{{ galleryLocation.name }}"
+                aria-label="Location of Abstract Art Gallery"
+            ></div>
+        </div>
+    </section>
+
+    <div class="cta-banner">
+        <div class="cta-banner-title">Accédez à des pièces d'exception.</div>
+        <a href="{{ path('app_catalog_index') }}" class="aag-button aag-button--primary">Découvrir la collection</a>
+    </div>
+
+    <script>
+        (() => {
+            document.querySelectorAll('[data-countdown]').forEach((node) => {
+                const parts = node.dataset.countdown.split(':').map(Number);
+                let totalSeconds = parts[0] * 3600 + parts[1] * 60 + parts[2];
+
+                const tick = () => {
+                    if (totalSeconds <= 0) {
+                        node.textContent = '00h : 00m : 00s';
+                        return;
+                    }
+
+                    totalSeconds -= 1;
+                    const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+                    const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+                    const seconds = String(totalSeconds % 60).padStart(2, '0');
+                    node.textContent = hours + 'h : ' + minutes + 'm : ' + seconds + 's';
+                };
+
+                setInterval(tick, 1000);
+            });
+        })();
+    </script>
+{% endblock %}

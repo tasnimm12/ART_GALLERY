@@ -1,0 +1,157 @@
+{% extends '@!EasyAdmin/crud/index.html.twig' %}
+
+{% block configured_stylesheets %}
+    {{ parent() }}
+    <style>
+        body.ea-index #main .datagrid {
+            border-collapse: separate;
+            border-spacing: 0 7px;
+            width: 100%;
+            min-width: 1400px;
+            overflow: visible !important;
+            table-layout: auto;
+        }
+
+        body.ea-index #main .admin-crud-shell,
+        body.ea-index #main {
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+        }
+
+        body.ea-index-Artwork #main .admin-crud-shell {
+            overflow-x: auto !important;
+            overflow-y: visible;
+        }
+
+        body.ea-index-Artwork .content-wrapper > .content {
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+        }
+
+        body.ea-index #main .admin-table-wrapper {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            overflow-x: auto;
+            overflow-y: visible;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        body.ea-index #main .datagrid thead th {
+            color: #C9A227;
+            font-size: 11px;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        body.ea-index #main .datagrid tbody tr {
+            background: rgba(255, 255, 255, .025);
+            transition: background-color .18s ease;
+        }
+
+        body.ea-index #main .datagrid tbody tr:hover {
+            background: rgba(201, 162, 39, .075);
+        }
+
+        body.ea-index #main .datagrid tbody td {
+            padding-block: 13px;
+            vertical-align: middle;
+        }
+
+        body.ea-index #main .field-artwork-id {
+            width: 58px;
+            color: #737373;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+
+        body.ea-index #main .field-artwork-title {
+            min-width: 180px;
+            color: #F5F1E9;
+            font-weight: 650;
+        }
+
+        body.ea-index #main .field-artwork-photo {
+            width: 100px;
+            min-width: 100px;
+        }
+
+        body.ea-index #main .field-artwork-photo img {
+            width: 54px;
+            height: 54px;
+            border: 1px solid rgba(201, 162, 39, .35);
+            border-radius: 7px;
+            object-fit: cover;
+        }
+
+        body.ea-index #main .field-artwork-artist {
+            min-width: 150px;
+        }
+
+        body.ea-index #main .field-artwork-category {
+            min-width: 180px;
+            white-space: nowrap;
+        }
+
+        body.ea-index #main .field-artwork-technique {
+            min-width: 160px;
+        }
+
+        body.ea-index #main .field-artwork-dimensions {
+            min-width: 140px;
+        }
+
+        body.ea-index #main .field-artwork-colors {
+            min-width: 180px;
+        }
+
+        body.ea-index #main .field-artwork-price {
+            min-width: 150px;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+
+        body.ea-index #main .field-artwork-status {
+            min-width: 130px;
+            white-space: nowrap;
+        }
+
+        body.ea-index #main .field-artwork-created-at {
+            min-width: 150px;
+            white-space: nowrap;
+        }
+
+        body.ea-index #main .datagrid thead th:last-child,
+        body.ea-index #main .datagrid tbody td.actions {
+            min-width: 140px;
+            white-space: nowrap;
+        }
+
+        body.ea-index .artwork-delete-all-form {
+            margin-left: 8px;
+        }
+
+        body.ea-index .artwork-delete-all-form .btn {
+            border-color: rgba(220, 53, 69, .45);
+        }
+    </style>
+{% endblock %}
+
+{% block configured_javascripts %}
+    {{ parent() }}
+{% endblock %}
+
+{% block page_actions %}
+    {{ parent() }}
+    <form method="post" action="{{ path('admin_artwork_delete_all') }}" class="artwork-delete-all-form" onsubmit="return confirm('Supprimer définitivement toutes les œuvres du catalogue ? Les commandes, les enchères et les offres historiques seront conservées.');">
+        <input type="hidden" name="_token" value="{{ csrf_token('delete-all-artworks') }}">
+        <button type="submit" class="btn btn-danger">
+            <twig:ea:Icon name="internal:delete" />
+            Supprimer toutes les œuvres
+        </button>
+    </form>
+{% endblock %}
